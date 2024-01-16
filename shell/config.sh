@@ -1,8 +1,8 @@
 #!/bin/bash
 # 加载通用函数
 source ./util.sh
+# ***************************************** 函数定义 ********************************************#
 
-# 定义帮助函数
 function help() {
     echo "Usage: ./config.sh [options]"
     echo "Options:"
@@ -137,11 +137,90 @@ function main() {
     bash install.sh -i
 }
 
-# 判断配置文件是否存在
-if [ ! -f "./project.ini" ]; then
+function printValue() {
+    echo -e "\e[32mcurrentDir: $s_currentDir\e[0m"
+    echo ""
+    echo -e "\e[32msoftName: $s_softName\e[0m"
+    echo ""
+    echo -e "\e[32msourceDir: $s_sourceDir\e[0m"
+    echo ""
+    echo -e "\e[32mbuildDir: $s_buildDir\e[0m"
+    echo ""
+    echo -e "\e[32mtargetDir: $s_targetDir\e[0m"
+    echo ""
+    echo -e "\e[32mzipFilePath: $s_zipFilePath\e[0m"
+    echo ""
+    echo -e "\e[32mbuildType: $s_buildType\e[0m"
+    echo ""
+    echo -e "\e[32muserName: $s_userName\e[0m"
+    echo ""
+    echo -e "\e[32mdependList: $s_dependList\e[0m"
+    echo ""
+    echo -e "\e[32mbuildDependList: $s_buildDependList\e[0m"
+    echo ""
+    echo -e "\e[32mlnName: $s_lnName\e[0m"
+    echo ""
+}
+
+function create_user_functions_sh() {
+    echo -e "\e[31muser_functions.sh文件不存在，创建user_functions.sh模版文件\e[0m"
+    touch user_functions.sh
+    echo '#!/bin/bash' > user_functions.sh
+    echo 'source ./util.sh' >> user_functions.sh
+    echo '' >> user_functions.sh
+    
+    echo 'function system_settings() {' >> user_functions.sh
+    echo '    echo "用户自定义 系统设置"' >> user_functions.sh
+    echo '}' >> user_functions.sh
+    echo '' >> user_functions.sh
+    
+    
+    echo 'function user_settings() {' >> user_functions.sh
+    echo '    echo "用户自定义 用户设置"' >> user_functions.sh
+    echo '}' >> user_functions.sh
+    echo '' >> user_functions.sh
+    
+    
+    echo 'function install_soft() {' >> user_functions.sh
+    echo '    echo "用户自定义 安装软件"' >> user_functions.sh
+    echo '}' >> user_functions.sh
+    echo '' >> user_functions.sh
+    
+    echo 'function uninstall_soft() {' >> user_functions.sh
+    echo '    echo "用户自定义 卸载软件"' >> user_functions.sh
+    echo '}' >> user_functions.sh
+    echo '' >> user_functions.sh
+    
+    
+    echo 'function check_os_version() {' >> user_functions.sh
+    echo '    check_ubuntu_version "22.04"' >> user_functions.sh
+    echo '    if [[ $? -ne 0 ]]; then' >> user_functions.sh
+    echo '        echo -e "\e[31m当前系统版本不是Ubuntu 22.04 桌面版\e[0m"' >> user_functions.sh
+    echo '        return 1' >> user_functions.sh
+    echo '    fi' >> user_functions.sh
+    echo '    return 0' >> user_functions.sh
+    echo '}' >> user_functions.sh
+    echo '' >> user_functions.sh
+    
+    echo -e "\e[32muser_functions.sh文件创建成功\e[0m"
+    xdg-open ./user_functions.sh
+}
+
+function create_install_ini() {
+    touch install.ini
+    echo "[install]" > install.ini
+    echo "userName=$s_userName" >> install.ini
+    echo "softName=$s_softName" >> install.ini
+    echo "dependList=$s_dependList" >> install.ini
+    echo "buildDependList=$s_buildDependList" >> install.ini
+    echo "lnName=$s_lnName" >> install.ini
+    echo "buildType=$s_buildType" >> install.ini
+}
+
+function create_project_ini() {
     echo -e "\e[31m配置文件不存在，创建配置文件\e[0m"
     touch project.ini
-    echo "softName=appName" >> project.ini
+    echo "softName=appName" > project.ini
     echo "sourceDir=/home/Template/sourceDir" >> project.ini
     echo "buildDir=/home/Template/buildDir" >> project.ini
     echo "targetDir=/home/Template/amd64" >> project.ini
@@ -153,6 +232,33 @@ if [ ! -f "./project.ini" ]; then
     echo "lnName=" >> project.ini
     echo -e "\e[32m配置文件创建成功\e[0m"
     xdg-open ./project.ini
+}
+
+
+function check_project_ini() {
+    # 判断是否使用的是模版的内容，如果是模版内容则提示退出
+    if [ "$s_softName" = "appName" ] && [ "$s_sourceDir" = "/home/Template/sourceDir" ] && [ "$s_buildDir" = "/home/Template/buildDir" ] && [ "$s_targetDir" = "/home/Template/amd64" ] && [ "$s_zipFilePath" = "/home/Template/" ] ; then
+        echo -e "\e[31m请修改配置文件 project.ini 中的内容\e[0m"
+        echo "使用 ./config.sh -s"
+        exit 1
+    fi
+}
+
+# ***************************************** 运行 ********************************************#
+isExit=0
+# 判断配置文件是否存在
+if [ ! -f "./project.ini" ]; then
+    create_project_ini
+    isExit=1
+fi
+
+# 判断配置文件是否存在
+if [ ! -f "./user_functions.sh" ]; then
+    create_user_functions_sh
+    isExit=1
+fi
+
+if [ $isExit -eq 1 ]; then
     exit 0
 fi
 
@@ -168,29 +274,6 @@ s_userName=$(read_iniFile_field "project.ini" "userName")
 s_dependList=$(read_iniFile_field "project.ini" "dependList")
 s_buildDependList=$(read_iniFile_field "project.ini" "buildDependList")
 s_lnName=$(read_iniFile_field "project.ini" "lnName")
-
-echo -e "\e[32mcurrentDir: $s_currentDir\e[0m"
-echo ""
-echo -e "\e[32msoftName: $s_softName\e[0m"
-echo ""
-echo -e "\e[32msourceDir: $s_sourceDir\e[0m"
-echo ""
-echo -e "\e[32mbuildDir: $s_buildDir\e[0m"
-echo ""
-echo -e "\e[32mtargetDir: $s_targetDir\e[0m"
-echo ""
-echo -e "\e[32mzipFilePath: $s_zipFilePath\e[0m"
-echo ""
-echo -e "\e[32mbuildType: $s_buildType\e[0m"
-echo ""
-echo -e "\e[32muserName: $s_userName\e[0m"
-echo ""
-echo -e "\e[32mdependList: $s_dependList\e[0m"
-echo ""
-echo -e "\e[32mbuildDependList: $s_buildDependList\e[0m"
-echo ""
-echo -e "\e[32mlnName: $s_lnName\e[0m"
-echo ""
 
 # 解析命令行参数
 while [[ $# -gt 0 ]]; do
@@ -223,22 +306,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-
-# 判断是否使用的是模版的内容，如果是模版内容则提示退出
-if [ "$s_softName" = "appName" ] && [ "$s_sourceDir" = "/home/Template/sourceDir" ] && [ "$s_buildDir" = "/home/Template/buildDir" ] && [ "$s_targetDir" = "/home/Template/amd64" ] && [ "$s_zipFilePath" = "/home/Template/" ] ; then
-    echo -e "\e[31m请修改配置文件 project.ini 中的内容\e[0m"
-    echo "使用 ./config.sh -s"
-    exit 1
-fi
-
-touch install.ini
-echo "[install]" > install.ini
-echo "userName=$s_userName" >> install.ini
-echo "softName=$s_softName" >> install.ini
-echo "dependList=$s_dependList" >> install.ini
-echo "buildDependList=$s_buildDependList" >> install.ini
-echo "lnName=$s_lnName" >> install.ini
-echo "buildType=$s_buildType" >> install.ini
-
+check_project_ini
+create_install_ini
 
 main

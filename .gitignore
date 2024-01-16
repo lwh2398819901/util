@@ -32,4 +32,5 @@
 *.app
 
 *.ini
+shell/user_functions.sh
 user_functions.sh

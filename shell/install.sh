@@ -5,38 +5,7 @@
 # 加载通用函数
 source ./util.sh
 source ./user_functions.sh
-s_userName=$(read_iniFile_field "install.ini" "userName")                       # 用户名
-s_softName=$(read_iniFile_field "install.ini" "softName")                       # 软件名
-s_dependList=$(read_iniFile_field "install.ini" "dependList")                   # 依赖列表
-s_buildDependList=$(read_iniFile_field "install.ini" "buildDependList")         # 构建依赖列表
-s_lnName=$(read_iniFile_field "install.ini" "lnName")                           # 软链接名
-s_buildType=$(read_iniFile_field "install.ini" "buildType")                     # 构建类型，默认为 Release
-
-if [[ $s_userName == "" ]]; then
-    # 获取id 1000的用户名
-    s_userName=$(id -u -n 1000)
-    echo "未指定用户名，默认使用 $s_userName"
-fi
-
-if [[ $s_softName == "" ]]; then
-    echo "未指定软件名，退出"
-    exit 1
-fi
-
-if [[ $s_dependList == "" ]]; then
-    echo "未指定依赖列表"
-fi
-
-if [[ $s_buildDependList == "" ]]; then
-    echo "未指定编译依赖列表"
-fi
-
-if [[ $s_buildType == "" ]]; then
-    echo "未指定编译类型，默认为Release"
-    s_buildType="Release"
-fi
-
-
+# ***************************************** 函数定义 ********************************************#
 function help() {
     echo "Usage: ./install.sh [OPTIONS]"
     echo "Options:"
@@ -68,7 +37,16 @@ function help() {
 # 安装软件依赖
 function installDepends() {
     check_root
+    if [[ $? -ne 0 ]]; then
+        echo "请使用root用户运行"
+        exit 1
+    fi
+    
     apt_update
+    if [[ $? -ne 0 ]]; then
+        exit 1
+    fi
+    
     for i in ${s_dependList[@]}; do
         check_and_install_package $i
         if [[ $? -ne 0 ]]; then
@@ -80,6 +58,11 @@ function installDepends() {
 # 卸载软件依赖
 function uninstallDepends() {
     check_root
+    if [[ $? -ne 0 ]]; then
+        echo "请使用root用户运行"
+        exit 1
+    fi
+    
     for i in ${s_dependList[@]}; do
         check_and_uninstall_package $i
         if [[ $? -ne 0 ]]; then
@@ -91,7 +74,16 @@ function uninstallDepends() {
 # 安装编译软件依赖
 function installBuildDepends() {
     check_root
+    if [[ $? -ne 0 ]]; then
+        echo "请使用root用户运行"
+        exit 1
+    fi
+    
     apt_update
+    if [[ $? -ne 0 ]]; then
+        exit 1
+    fi
+    
     for i in ${s_buildDependList[@]}; do
         check_and_install_package $i
         if [[ $? -ne 0 ]]; then
@@ -103,6 +95,11 @@ function installBuildDepends() {
 # 卸载编译软件依赖
 function uninstallBuildDepends() {
     check_root
+    if [[ $? -ne 0 ]]; then
+        echo "请使用root用户运行"
+        exit 1
+    fi
+    
     for i in ${s_buildDependList[@]}; do
         check_and_uninstall_package $i
         if [[ $? -ne 0 ]]; then
@@ -114,14 +111,22 @@ function uninstallBuildDepends() {
 # 设置系统设置
 function systemSetting() {
     check_root
+    if [[ $? -ne 0 ]]; then
+        echo "请使用root用户运行"
+        exit 1
+    fi
     
     if [[ $s_userName == "root" ]]; then
-        echo -e "\e[31m当前使用root用户安装，建议使用普通用户安装\e[0m"
+        echo -e "\e[31m当前用户名配置为root，建议修改配置文件内userName字段\e[0m"
         read -rsp $'按回车键继续... 或者 ctrl + c 结束安装\n'
     fi
     
     # 判断用户是否存在
     check_user_exist $s_userName
+    if [[ $? -ne 0 ]]; then
+        exit 1
+    fi
+    
     system_settings $s_userName
 }
 
@@ -265,7 +270,6 @@ function main() {
     fi
     
     if [[ $1 == "-A" || $1 == "--allSettings" ]]; then
-        s_userName=$2
         echo "系统设置"
         systemSetting
         installDepends
@@ -284,7 +288,6 @@ function main() {
     fi
     
     if [[ $1 == "-S" || $1 == "--systemSetting" ]]; then
-        s_userName=$2
         systemSetting $s_userName
         promptReboot
         exit 0
@@ -328,5 +331,37 @@ function main() {
     
     help
 }
+
+# ***************************************** 运行 ********************************************#
+s_userName=$(read_iniFile_field "install.ini" "userName")                       # 用户名
+s_softName=$(read_iniFile_field "install.ini" "softName")                       # 软件名
+s_dependList=$(read_iniFile_field "install.ini" "dependList")                   # 依赖列表
+s_buildDependList=$(read_iniFile_field "install.ini" "buildDependList")         # 构建依赖列表
+s_lnName=$(read_iniFile_field "install.ini" "lnName")                           # 软链接名
+s_buildType=$(read_iniFile_field "install.ini" "buildType")                     # 构建类型，默认为 Release
+
+if [[ $s_userName == "" ]]; then
+    # 获取id 1000的用户名
+    s_userName=$(id -u -n 1000)
+    echo "未指定用户名，默认使用 $s_userName"
+fi
+
+if [[ $s_softName == "" ]]; then
+    echo "未指定软件名，退出"
+    exit 1
+fi
+
+if [[ $s_dependList == "" ]]; then
+    echo "未指定依赖列表"
+fi
+
+if [[ $s_buildDependList == "" ]]; then
+    echo "未指定编译依赖列表"
+fi
+
+if [[ $s_buildType == "" ]]; then
+    echo "未指定编译类型，默认为Release"
+    s_buildType="Release"
+fi
 
 main "$@"

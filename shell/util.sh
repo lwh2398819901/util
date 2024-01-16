@@ -77,7 +77,7 @@ function check_and_install_package() {
         apt install -y $package_name
         if [[ $? -ne 0 ]]; then
             echo "安装 $package_name 出错！"
-            exit 1
+            return 1
         fi
     fi
 }

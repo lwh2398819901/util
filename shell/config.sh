@@ -45,7 +45,7 @@ function build_and_copy_software() {
         exit 1
     fi
     
-    copy_files "./bin/*" "${s_targetDir}/${s_buildType}"
+    copy_files "./bin/$s_softName" "${s_targetDir}/${s_buildType}"
     if [ $? -ne 0 ]; then
         echo -e "\e[31m复制可执行程序$s_softName 失败\e[0m"
         exit 1
@@ -112,29 +112,10 @@ function create_zip_file() {
 function cleanTarget () {
     rm -rf "$s_targetDir"
     rm -rf $s_zipFilePath/$s_softName*.zip
-    exit 0
 }
 
 function cleanBuildDir () {
     rm -rf "$s_buildDir"
-    exit 0
-}
-
-function main() {
-    build_and_copy_software
-    if [ $? -ne 0 ]; then
-        echo -e "\e[31m构建失败\e[0m"
-        exit 1
-    fi
-    
-    create_zip_file
-    if [ $? -ne 0 ]; then
-        echo -e "\e[31m创建压缩包失败\e[0m"
-        exit 1
-    fi
-    
-    cd $s_targetDir
-    bash install.sh -i
 }
 
 function printValue() {
@@ -193,6 +174,7 @@ function create_user_functions_sh() {
     
     
     echo 'function check_os_version() {' >> user_functions.sh
+    ecgo '    echo "用户自定义 检查系统版本 这是一个示例 请自行修改"' >> user_functions.sh
     echo '    check_ubuntu_version "22.04"' >> user_functions.sh
     echo '    if [[ $? -ne 0 ]]; then' >> user_functions.sh
     echo '        echo -e "\e[31m当前系统版本不是Ubuntu 22.04 桌面版\e[0m"' >> user_functions.sh
@@ -234,7 +216,6 @@ function create_project_ini() {
     xdg-open ./project.ini
 }
 
-
 function check_project_ini() {
     # 判断是否使用的是模版的内容，如果是模版内容则提示退出
     if [ "$s_softName" = "appName" ] && [ "$s_sourceDir" = "/home/Template/sourceDir" ] && [ "$s_buildDir" = "/home/Template/buildDir" ] && [ "$s_targetDir" = "/home/Template/amd64" ] && [ "$s_zipFilePath" = "/home/Template/" ] ; then
@@ -242,6 +223,23 @@ function check_project_ini() {
         echo "使用 ./config.sh -s"
         exit 1
     fi
+}
+
+function main() {
+    build_and_copy_software
+    if [ $? -ne 0 ]; then
+        echo -e "\e[31m构建失败\e[0m"
+        exit 1
+    fi
+    
+    create_zip_file
+    if [ $? -ne 0 ]; then
+        echo -e "\e[31m创建压缩包失败\e[0m"
+        exit 1
+    fi
+    
+    cd $s_targetDir
+    bash install.sh -i
 }
 
 # ***************************************** 运行 ********************************************#
@@ -306,7 +304,8 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+printValue
 check_project_ini
 create_install_ini
 
-main
+main "$@"

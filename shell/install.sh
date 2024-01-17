@@ -177,7 +177,6 @@ installSoft() {
     # 复制desktop文件
     if [ ! -f "$softName.desktop" ]; then
         echo -e "\e[31m$softName.desktop文件不存在\e[0m"
-        exit 1
     else
         # 复制配置文件，然后替换其中的[user]为当前用户名
         copy_files "$softName.desktop" "$softDir"
@@ -210,7 +209,6 @@ installSoft() {
         fi
         
         copy_files "$softDir/$softName.desktop" /home/$userName/桌面
-        
     fi
     
     if [[ $s_lnName == "" ]]; then
@@ -218,8 +216,10 @@ installSoft() {
         s_lnName=$(read_iniFile_field "$softDir/$softName.desktop" "Name")
     fi
     
-    if [ ! -d /home/$userName/桌面/$s_lnName ]; then
-        ln -s "$softDir/" /home/$userName/桌面/$s_lnName
+    if [[ $s_lnName != "" ]]; then
+        if [ ! -d /home/$userName/桌面/$s_lnName ]; then
+            ln -s "$softDir/" /home/$userName/桌面/$s_lnName
+        fi
     fi
     
     install_soft

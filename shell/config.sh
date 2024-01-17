@@ -45,9 +45,9 @@ function build_and_copy_software() {
         exit 1
     fi
     
-    copy_files "./bin/$s_softName" "${s_targetDir}/${s_buildType}"
+    cp $s_buildDir/bin/* $s_targetDir/$s_buildType
     if [ $? -ne 0 ]; then
-        echo -e "\e[31m复制可执行程序$s_softName 失败\e[0m"
+        echo -e "\e[31m复制可执行程序失败\e[0m"
         exit 1
     fi
     
@@ -174,7 +174,7 @@ function create_user_functions_sh() {
     
     
     echo 'function check_os_version() {' >> user_functions.sh
-    ecgo '    echo "用户自定义 检查系统版本 这是一个示例 请自行修改"' >> user_functions.sh
+    echo '    echo "用户自定义 检查系统版本 这是一个示例 请自行修改"' >> user_functions.sh
     echo '    check_ubuntu_version "22.04"' >> user_functions.sh
     echo '    if [[ $? -ne 0 ]]; then' >> user_functions.sh
     echo '        echo -e "\e[31m当前系统版本不是Ubuntu 22.04 桌面版\e[0m"' >> user_functions.sh

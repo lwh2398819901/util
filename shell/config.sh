@@ -19,96 +19,6 @@ function help() {
     exit 0
 }
 
-function build_and_copy_software() {
-    create_dir "$s_targetDir"
-    if [ $? -ne 0 ]; then
-        echo -e "\e[31m创建$s_targetDir 目录失败: $s_targetDir\e[0m"
-        exit 1
-    fi
-    
-    create_dir "$s_buildDir"
-    if [ $? -ne 0 ]; then
-        echo -e "\e[31m创建$s_buildDir 目录失败: $s_buildDir\e[0m"
-        exit 1
-    fi
-    cd "$s_buildDir"
-    
-    cmake_cmd=$(cmake -DCMAKE_BUILD_TYPE="$s_buildType" "$s_sourceDir")
-    if [ $? -ne 0 ]; then
-        echo -e "\e[31mCMake 命令执行失败: $cmake_cmd\e[0m"
-        exit 1
-    fi
-    
-    make_cmd=$(make)
-    if [ $? -ne 0 ]; then
-        echo -e "\e[31mmake 命令执行失败: $make_cmd\e[0m"
-        exit 1
-    fi
-    
-    copy_files $s_buildDir/bin/* $s_targetDir/$s_buildType
-    if [ $? -ne 0 ]; then
-        echo -e "\e[31m复制可执行程序失败\e[0m"
-        exit 1
-    fi
-    
-    copy_files "${s_sourceDir}/resource/install/" "$s_targetDir"
-    if [ $? -ne 0 ]; then
-        echo -e "\e[31m复制 install目录 文件失败\e[0m"
-        exit 1
-    fi
-    
-    mv $s_targetDir/install/*  $s_targetDir
-    if [ $? -ne 0 ]; then
-        echo -e "\e[31m移动文件失败\e[0m"
-        exit 1
-    fi
-    
-    copy_files "$s_currentDir/util.sh" $s_targetDir
-    if [ $? -ne 0 ]; then
-        echo -e "\e[31m复制 util.sh 文件失败\e[0m"
-        exit 1
-    fi
-    
-    copy_files "$s_currentDir/install.sh" $s_targetDir
-    if [ $? -ne 0 ]; then
-        echo -e "\e[31m复制 install.sh 文件失败\e[0m"
-        exit 1
-    fi
-    
-    copy_files "$s_currentDir/user_functions.sh" $s_targetDir
-    if [ $? -ne 0 ]; then
-        echo -e "\e[31m复制 user_functions.sh 文件失败\e[0m"
-        exit 1
-    fi
-    
-    copy_files "$s_currentDir/install.ini" $s_targetDir
-    if [ $? -ne 0 ]; then
-        echo -e "\e[31m复制 install.ini 文件失败\e[0m"
-        exit 1
-    fi
-    rm -rf $s_targetDir/install
-}
-
-function create_zip_file() {
-    cd "$s_sourceDir"
-    local current_date=$(date +"%m.%d")
-    local current_tag=$(git describe --tags --abbrev=0)
-    
-    if [ -z "$current_tag" ]; then
-        current_tag=$(date +"%H%M%S")
-    fi
-    
-    cd "$s_targetDir"
-    local zip_file_name="${s_softName}_${current_tag}_${s_buildType}_${current_date}.zip"
-    zip -r "$s_zipFilePath/$zip_file_name" "."
-    if [ $? -ne 0 ]; then
-        echo -e "\e[31m创建压缩包失败\e[0m"
-        exit 1
-    fi
-    
-    echo "压缩包创建完成：$s_zipFilePath/$zip_file_name"
-}
-
 function cleanTarget () {
     rm -rf "$s_targetDir"
     rm -rf $s_zipFilePath/$s_softName*.zip
@@ -185,7 +95,6 @@ function create_user_functions_sh() {
     echo '' >> user_functions.sh
     
     echo -e "\e[32muser_functions.sh文件创建成功\e[0m"
-    xdg-open ./user_functions.sh
 }
 
 function create_install_ini() {
@@ -202,27 +111,111 @@ function create_install_ini() {
 function create_project_ini() {
     echo -e "\e[31m配置文件不存在，创建配置文件\e[0m"
     touch project.ini
-    echo "softName=appName" > project.ini
-    echo "sourceDir=/home/Template/sourceDir" >> project.ini
-    echo "buildDir=/home/Template/buildDir" >> project.ini
-    echo "targetDir=/home/Template/amd64" >> project.ini
-    echo "zipPath=/home/Template/" >> project.ini
-    echo "buildType=Release" >> project.ini
-    echo "userName=" >> project.ini
-    echo "dependList=" >> project.ini
-    echo "buildDependList=" >> project.ini
-    echo "lnName=" >> project.ini
+    
+    local script_src=$(cd "../../" && pwd)
+    local script_build=$(cd "../../../" && pwd)
+    local script_root=$(cd "../../../../" && pwd)
+    
+    
+    # 根据当前脚本位置构建其他路径
+    local softName=$(basename $script_src)
+    local sourceDir="${script_src}"
+    local buildDir="${script_build}/build-$softName-unknown-Release"
+    local targetDir="${script_root}/amd64"
+    local zipPath="${script_root}"
+    local buildType="Release"
+    local userName=""
+    local dependList="vlc libvlc-dev qt5-default qtmultimedia5-dev libqt5multimedia5-plugins libqt5multimediawidgets5 gstreamer1.0-libav gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly"
+    local buildDependList="gcc g++ cmake qtcreator"
+    local lnName=""
+    
+    # 将这些信息写入到project.ini文件
+    echo "[project]" > project.ini
+    echo "softName=${softName}" >> project.ini
+    echo "sourceDir=${sourceDir}" >> project.ini
+    echo "buildDir=${buildDir}" >> project.ini
+    echo "targetDir=${targetDir}" >> project.ini
+    echo "zipPath=${zipPath}" >> project.ini
+    echo "buildType=${buildType}" >> project.ini
+    echo "userName=${userName}" >> project.ini
+    echo "dependList=${dependList}" >> project.ini
+    echo "buildDependList=${buildDependList}" >> project.ini
+    echo "lnName=${lnName}" >> project.ini
+    
     echo -e "\e[32m配置文件创建成功\e[0m"
-    xdg-open ./project.ini
 }
 
-function check_project_ini() {
-    # 判断是否使用的是模版的内容，如果是模版内容则提示退出
-    if [ "$s_softName" = "appName" ] && [ "$s_sourceDir" = "/home/Template/sourceDir" ] && [ "$s_buildDir" = "/home/Template/buildDir" ] && [ "$s_targetDir" = "/home/Template/amd64" ] && [ "$s_zipFilePath" = "/home/Template/" ] ; then
-        echo -e "\e[31m请修改配置文件 project.ini 中的内容\e[0m"
-        echo "使用 ./config.sh -s"
+
+function build_and_copy_software() {
+    create_dir "$s_targetDir"
+    if [ $? -ne 0 ]; then
+        echo -e "\e[31m创建$s_targetDir 目录失败\e[0m"
         exit 1
     fi
+    
+    create_dir "$s_buildDir"
+    if [ $? -ne 0 ]; then
+        echo -e "\e[31m创建$s_buildDir 目录失败\e[0m"
+        exit 1
+    fi
+    cd "$s_buildDir"
+    
+    cmake_cmd=$(cmake -DCMAKE_BUILD_TYPE="$s_buildType" "$s_sourceDir")
+    if [ $? -ne 0 ]; then
+        echo -e "\e[31mCMake 命令执行失败: $cmake_cmd\e[0m"
+        exit 1
+    fi
+    
+    make_cmd=$(make)
+    if [ $? -ne 0 ]; then
+        echo -e "\e[31mmake 命令执行失败: $make_cmd\e[0m"
+        exit 1
+    fi
+    
+    copy_files $s_buildDir/bin/* $s_targetDir/$s_buildType
+    if [ $? -ne 0 ]; then
+        echo -e "\e[31m复制可执行程序失败\e[0m"
+        exit 1
+    fi
+    
+    copy_files ${s_sourceDir}/resource/install/* $s_targetDir
+    if [ $? -ne 0 ]; then
+        echo -e "\e[31m复制 install目录文件失败\e[0m"
+        exit 1
+    fi
+    
+    
+    copy_files $s_currentDir/util.sh $s_targetDir
+    if [ $? -ne 0 ]; then
+        echo -e "\e[31m复制 util.sh 文件失败\e[0m"
+        exit 1
+    fi
+    
+    copy_files $s_currentDir/install.sh $s_targetDir
+    if [ $? -ne 0 ]; then
+        echo -e "\e[31m复制 install.sh 文件失败\e[0m"
+        exit 1
+    fi
+}
+
+function create_zip_file() {
+    cd "$s_sourceDir"
+    local current_date=$(date +"%m.%d")
+    local current_tag=$(git describe --tags --abbrev=0)
+    
+    if [ -z "$current_tag" ]; then
+        current_tag=$(date +"%H%M%S")
+    fi
+    
+    cd "$s_targetDir"
+    local zip_file_name="${s_softName}_${current_tag}_${s_buildType}_${current_date}.zip"
+    zip -r "$s_zipFilePath/$zip_file_name" "."
+    if [ $? -ne 0 ]; then
+        echo -e "\e[31m创建压缩包失败\e[0m"
+        exit 1
+    fi
+    
+    echo "压缩包创建完成：$s_zipFilePath/$zip_file_name"
 }
 
 function main() {
@@ -244,24 +237,20 @@ function main() {
 
 # ***************************************** 运行 ********************************************#
 isExit=0
-# 判断配置文件是否存在
-if [ ! -f "./project.ini" ]; then
-    create_project_ini
-    isExit=1
-fi
-
+s_currentDir=$(pwd)
 # 判断配置文件是否存在
 if [ ! -f "./user_functions.sh" ]; then
     create_user_functions_sh
+fi
+
+# 判断配置文件是否存在
+if [ ! -f "./project.ini" ]; then
+    create_project_ini
+    echo "请检查配置文件后，再次运行"
     isExit=1
 fi
 
-if [ $isExit -eq 1 ]; then
-    exit 0
-fi
-
 # 设置默认值 全局变量使用s_开头
-s_currentDir=$(pwd)
 s_softName=$(read_iniFile_field "project.ini" "softName")       # 软件名称  appName
 s_sourceDir=$(read_iniFile_field "project.ini" "sourceDir")     # 源码目录      /home/test/sourceDir
 s_buildDir=$(read_iniFile_field "project.ini" "buildDir")       # 构建目录      /home/test/buildDir
@@ -272,6 +261,8 @@ s_userName=$(read_iniFile_field "project.ini" "userName")
 s_dependList=$(read_iniFile_field "project.ini" "dependList")
 s_buildDependList=$(read_iniFile_field "project.ini" "buildDependList")
 s_lnName=$(read_iniFile_field "project.ini" "lnName")
+
+create_install_ini
 
 # 解析命令行参数
 while [[ $# -gt 0 ]]; do
@@ -304,8 +295,12 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+
+if [[ $isExit -eq 1 ]]; then
+    exit 1
+fi
+
+
 printValue
-check_project_ini
-create_install_ini
 
 main "$@"

@@ -161,6 +161,7 @@ function pri_copyFiles() {
 
 # 定义拷贝文件的函数
 function copy_files() {
+    echo "$@"
     if [[ $# -eq 2 ]]; then
         pri_copyFiles "$1" "$2"
         if [[ $? -ne 0 ]]; then

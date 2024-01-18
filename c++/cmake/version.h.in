@@ -1,0 +1,9 @@
+#ifndef VERSION_H
+#define VERSION_H
+
+#define GIT_PROJECT_VERSION "@GIT_PROJECT_VERSION@"
+#define PRODUCT_NAME "@PRODUCT_NAME@"
+
+
+#endif
+

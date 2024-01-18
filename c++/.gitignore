@@ -1,0 +1,52 @@
+# Qt Framework ignore file
+# Ignore build artifacts
+build/
+*.o
+*.obj
+*.a
+*.dll
+*.exe
+*.lib
+*.so
+
+# Ignore generated files
+Makefile
+qrc_*.cpp
+moc_*.cpp
+ui_*.h
+
+# Ignore user-specific files
+*.user
+*.moc
+*.pro.user
+
+# Ignore backup files
+*~
+*.bak
+*.swp
+
+# Ignore Qt Creator files
+*.autosave
+*.creator.user
+*.session
+*.pro.user
+/build*
+# Ignore Visual Studio files
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.pdb
+
+# Ignore Xcode files
+*.xcodeproj
+*.xcworkspace
+
+# Ignore other IDE files
+.project
+.settings/
+.idea/
+.vscode/
+
+# ignore other user files
+version.h

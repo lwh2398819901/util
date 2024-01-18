@@ -1,0 +1,3 @@
+[submodule "c++/3rdpart/spdlog"]
+	path = c++/3rdpart/spdlog
+	url = https://gitee.com/mirror_1/spdlog.git

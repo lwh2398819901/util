@@ -104,9 +104,8 @@ function create_dir() {
     fi
     return 0
 }
-
-# 定义拷贝文件的函数
-function copy_files() {
+# 内部拷贝函数 不对外使用
+function pri_copyFiles() {
     # 源目录
     local sourceDir="$1"
     # 目标目录
@@ -114,7 +113,7 @@ function copy_files() {
     
     # 判断源文件与目标文件是否相同
     if [ "$sourceDir" == "$targetDir" ]; then
-        echo "源文件与目标文件相同！"
+        echo "源文件与目标文件路径相同！"
         return 0
     fi
     
@@ -160,6 +159,26 @@ function copy_files() {
     return 0
 }
 
+# 定义拷贝文件的函数
+function copy_files() {
+    if [[ $# -eq 2 ]]; then
+        pri_copyFiles "$1" "$2"
+        if [[ $? -ne 0 ]]; then
+            return 1
+        fi
+    else
+        last_arg=${!#}
+        for tmp in "${@:1:$#-1}"; do
+            pri_copyFiles "$tmp" "$last_arg"
+            if [[ $? -ne 0 ]]; then
+                return 1
+            fi
+        done
+    fi
+    
+    return 0
+}
+
 function promptReboot() {
     read -p "是否重启系统以应用更改？(y/n): " answer
     if [[ $answer == "y" || $answer == "Y" ]]; then
@@ -176,5 +195,3 @@ function read_iniFile_field() {
     local value=$(grep -oP '^'$field'=\K.*' "$filePath")
     echo "$value"
 }
-
-

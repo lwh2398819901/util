@@ -45,7 +45,7 @@ function build_and_copy_software() {
         exit 1
     fi
     
-    cp $s_buildDir/bin/* $s_targetDir/$s_buildType
+    copy_files $s_buildDir/bin/* $s_targetDir/$s_buildType
     if [ $? -ne 0 ]; then
         echo -e "\e[31m复制可执行程序失败\e[0m"
         exit 1

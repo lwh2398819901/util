@@ -1,0 +1,163 @@
+cmake_minimum_required(VERSION 3.5)
+
+# 检查当前目录是否为Git仓库
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../.git")
+  set(IS_GIT_PROJECT false)
+else()
+  set(IS_GIT_PROJECT true)
+endif()
+
+if (IS_GIT_PROJECT)
+    message("CMake is  Git project")
+
+    execute_process(
+        COMMAND git describe --tags --abbrev=0
+        TIMEOUT 5
+        OUTPUT_VARIABLE GIT_PROJECT_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        #RESULT_VARIABLE GIT_COMMAND_RESULT
+    )
+
+    if(GIT_COMMAND_RESULT)
+        message("Failed to get project version from Git.")
+    endif()
+
+    add_definitions(-DBUILD_VERSION=\"${GIT_PROJECT_VERSION}\")
+
+    project(informationClient VERSION ${GIT_PROJECT_VERSION} LANGUAGES CXX)
+
+else()
+    message("CMake is not Git project")
+    project(informationClient VERSION  1.0.0 LANGUAGES CXX)
+    set (GIT_PROJECT_VERSION ${PROJECT_VERSION})
+endif()
+
+set (PRODUCT_NAME ${PROJECT_NAME})
+
+configure_file(
+    ${CMAKE_SOURCE_DIR}/util/cmake/version.h.in
+    ${CMAKE_SOURCE_DIR}/util/include/publish/version.h
+    @ONLY
+)
+
+message("Major Version: ${PROJECT_VERSION_MAJOR}")
+message("Minor Version: ${PROJECT_VERSION_MINOR}")
+message("Patch Version: ${PROJECT_VERSION_PATCH}")
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS REQUIRED
+    Core
+    Gui
+    Network
+    WebSockets
+    WebEngineWidgets
+    )
+
+
+set(PROJECT_SOURCES
+        util/configure/configure.h
+        util/configure/configure.cpp
+
+        util/include/publish/logger.h
+        util/include/publish/pub_macro.h
+        util/include/publish/configurebase.h
+        util/include/publish/pub_func.h
+        util/include/publish/publish.h
+        util/include/reconnectTcpclient/reconnecttcpclient.h
+        util/include/qtsingleapplication/qtlockedfile.h
+        util/include/qtsingleapplication/qtlocalpeer.h
+        util/include/qtsingleapplication/qtsinglecoreapplication.h
+        util/include/qtsingleapplication/qtsingleapplication.h
+        util/include/thread/workthread.h
+        util/include/networkaccessmanager/networkaccessmanager.h
+
+        util/src/publish/logger.cpp
+        util/src/publish/configurebase.cpp
+        util/src/publish/pub_func.cpp
+        util/src/reconnectTcpclient/reconnecttcpclient.cpp
+        util/src/qtsingleapplication/qtlocalpeer.cpp
+        util/src/qtsingleapplication/qtsingleapplication.cpp
+        util/src/qtsingleapplication/qtsinglecoreapplication.cpp
+        util/src/thread/workthread.cpp
+        util/src/networkaccessmanager/networkaccessmanager.cpp
+)
+
+
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+    qt_add_executable(${PROJECT_NAME}
+        MANUAL_FINALIZATION
+        ${PROJECT_SOURCES}
+    )
+# Define target properties for Android with Qt 6 as:
+#    set_property(TARGET testInformation APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
+# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
+else()
+    if(ANDROID)
+        add_library(${PROJECT_NAME} SHARED
+            ${PROJECT_SOURCES}
+        )
+# Define properties for Android with Qt 5 after find_package() calls as:
+#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
+    else()
+        add_executable(${PROJECT_NAME}
+            ${PROJECT_SOURCES}
+        )
+    endif()
+endif()
+
+
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Network
+    )
+
+# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
+# If you are developing for iOS or macOS you should consider setting an
+# explicit, fixed bundle identifier manually though.
+if(${QT_VERSION} VERSION_LESS 6.1.0)
+  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.${PROJECT_NAME})
+endif()
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    ${BUNDLE_ID_OPTION}
+    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+    MACOSX_BUNDLE TRUE
+    WIN32_EXECUTABLE TRUE
+)
+
+include(GNUInstallDirs)
+
+install(TARGETS ${PROJECT_NAME}
+    BUNDLE DESTINATION .
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+if(QT_VERSION_MAJOR EQUAL 6)
+    qt_finalize_executable(${PROJECT_NAME})
+endif()
+
+
+
+target_include_directories(${PROJECT_NAME} PRIVATE util/configure)
+target_include_directories(${PROJECT_NAME} PRIVATE util/include/publish)
+target_include_directories(${PROJECT_NAME} PRIVATE util/include/reconnectTcpclient)
+target_include_directories(${PROJECT_NAME} PRIVATE util/include/qtsingleapplication)
+target_include_directories(${PROJECT_NAME} PRIVATE util/include/thread)
+target_include_directories(${PROJECT_NAME} PRIVATE util/include/networkaccessmanager)
+
+# 第三方库加载
+add_subdirectory(util/3rdpart/spdlog)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/util/3rdpart/spdlog/include)

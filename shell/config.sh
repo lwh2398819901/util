@@ -113,8 +113,14 @@ function create_project_ini() {
     touch project.ini
     
     local script_src=$(cd "../../" && pwd)
-    local script_build=$(cd "../../../" && pwd)
-    local script_root=$(cd "../../../../" && pwd)
+    local script_build=$(cd "$script_src/../" && pwd)
+    local script_root=$(cd "$script_build/../" && pwd)
+    
+    # 判断配置文件是否存在
+    if [ -f "$script_src/resource/install/project.ini" ]; then
+        copy_files "$script_src/resource/install/project.ini" ./
+        return 0
+    fi
     
     
     # 根据当前脚本位置构建其他路径

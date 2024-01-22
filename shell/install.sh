@@ -12,12 +12,12 @@ function help() {
     echo "  -h, --help                                      显示本帮助文档并退出"
     echo "  -A, --allSettings                               安装依赖 + 系统设置 需要root权限"
     echo "  -a, --allUserSettings                           用户系统设置 + 安装软件 不要使用sudo或root用户执行"
-    echo "  -I, --installDepends                            安装依赖 使用sudo或root用户执行"
-    echo "  -U, --uninstallDepends                          卸载依赖 使用sudo或root用户执行"
-    echo "  -B, --installBuildDepends                       安装编译依赖 仅开发环境需要安装 用户请勿安装 使用sudo或root用户执行"
-    echo "  -b, --uninstallBuildDepends                     卸载编译依赖 使用sudo或root用户执行"
     echo "  -S, --systemSetting                             系统设置 需要root权限"
     echo "  -s, --userSettings                              用户系统设置 不要使用sudo或root用户执行"
+    echo "  -B, --installBuildDepends                       安装编译依赖 仅开发环境需要安装 用户请勿安装 使用sudo或root用户执行"
+    echo "  -b, --uninstallBuildDepends                     卸载编译依赖 使用sudo或root用户执行"
+    echo "  -I, --installDepends                            安装依赖 使用sudo或root用户执行"
+    echo "  -U, --uninstallDepends                          卸载依赖 使用sudo或root用户执行"
     echo "  -i, --installSoft                               安装软件 不要使用sudo或root用户执行"
     echo "  -u, --uninstallSoft                             卸载软件 不要使用sudo或root用户执行"
     
@@ -44,7 +44,7 @@ function installDepends() {
     
     apt_update
     if [[ $? -ne 0 ]]; then
-        exit 1
+        echo "apt update失败，可能导致安装错误"
     fi
     
     for i in ${s_dependList[@]}; do
@@ -81,7 +81,7 @@ function installBuildDepends() {
     
     apt_update
     if [[ $? -ne 0 ]]; then
-        exit 1
+        echo "apt update失败，可能导致安装错误"
     fi
     
     for i in ${s_buildDependList[@]}; do
@@ -145,7 +145,7 @@ installSoft() {
     local softName=$s_softName
     local softDir=/home/$userName/.local/bin/$softName
     
-    echo "默认停止当前监控进程"
+    echo "停止当前进程"
     pkill $softName
     pkill -f /home/$userName/.local/bin/$softName/$softName
     pkill -f ~/.local/bin/$softName/$softName
@@ -207,7 +207,6 @@ installSoft() {
                 exit 1
             fi
         fi
-        
         copy_files "$softDir/$softName.desktop" /home/$userName/桌面
     fi
     

@@ -12,7 +12,7 @@ function help() {
     echo "  -h, --help                                      显示本帮助文档并退出"
     echo "  -A, --allSettings                               安装依赖 + 系统设置 需要root权限"
     echo "  -a, --allUserSettings                           用户系统设置 + 安装软件 不要使用sudo或root用户执行"
-    echo "  -S, --systemSetting                             系统设置 需要root权限"
+    echo "  -S, --systemSettings                            系统设置 需要root权限"
     echo "  -s, --userSettings                              用户系统设置 不要使用sudo或root用户执行"
     echo "  -B, --installBuildDepends                       安装编译依赖 仅开发环境需要安装 用户请勿安装 使用sudo或root用户执行"
     echo "  -b, --uninstallBuildDepends                     卸载编译依赖 使用sudo或root用户执行"
@@ -109,7 +109,7 @@ function uninstallBuildDepends() {
 }
 
 # 设置系统设置
-function systemSetting() {
+function systemSettings() {
     check_root
     if [[ $? -ne 0 ]]; then
         echo "请使用root用户运行"
@@ -131,11 +131,11 @@ function systemSetting() {
 }
 
 function userSettings() {
-    user_settings
+    user_settings $s_userName
 }
 
 # 安装软件 使用普通用户安装 root用户警告
-installSoft() {
+function installSoft() {
     if [[ $EUID -eq 0 ]]; then
         echo -e "\e[31m当前使用root用户安装，建议使用普通用户安装\e[0m"
         read -rsp $'按回车键继续... 或者 ctrl + c 结束安装\n'
@@ -221,7 +221,7 @@ installSoft() {
         fi
     fi
     
-    install_soft
+    install_soft $userName
     echo "安装完成"
 }
 
@@ -232,7 +232,7 @@ function uninstallSoft() {
     # 删除应用程序和桌面快捷方式
     rm -f /home/$userName/.local/share/applications/$softName.desktop
     rm -f /home/$userName/桌面/$softName.desktop
-    rm -rf /home/$userName/.config/autostart/media$softNameClient.desktop
+    rm -rf /home/$userName/.config/autostart/media$softName.desktop
     
     # 删除安装目录和文件
     softDir=/home/$userName/.local/bin/$softName
@@ -253,7 +253,7 @@ function uninstallSoft() {
         echo "安装目录 $softDir 不存在"
     fi
     
-    uninstall_soft
+    uninstall_soft $userName
     echo "卸载完成"
 }
 
@@ -270,7 +270,7 @@ function main() {
     
     if [[ $1 == "-A" || $1 == "--allSettings" ]]; then
         echo "系统设置"
-        systemSetting
+        systemSettings
         installDepends
         echo "系统设置完成"
         promptReboot
@@ -286,8 +286,8 @@ function main() {
         exit 0
     fi
     
-    if [[ $1 == "-S" || $1 == "--systemSetting" ]]; then
-        systemSetting $s_userName
+    if [[ $1 == "-S" || $1 == "--systemSettings" ]]; then
+        systemSettings $s_userName
         promptReboot
         exit 0
     fi

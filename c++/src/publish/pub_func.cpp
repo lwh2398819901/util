@@ -11,9 +11,7 @@
 #include <QTimer>
 #include <QWidget>
 #include <QEventLoop>
-
-
-
+#include <QVector>
 
 bool byteArray2JsonOBj(const QByteArray &reply_data, QJsonObject &obj)
 {
@@ -60,7 +58,6 @@ bool hasKey(const QJsonObject &obj, QString key, int &value)
     return true;
 }
 
-
 QDateTime getCreationDate(const QString &path)
 {
     QFileInfo fileInfo(path);
@@ -80,31 +77,13 @@ QString generateUuid(QStringList list)
     return hash.toHex();
 }
 
-
-void runCommand(const QString &command)
+void runCommandDetached(const QString &command,const QStringList& args)
 {
-    QProcess::startDetached(command);
+    QProcess::startDetached(command,args);
 }
 
-QString runCommandWithTimeout(const QString &command, int timeout)
+int runCommandWithTimeout(const QString &command,const QStringList& args, QString &output, int timeout)
 {
-    QProcess process;
-    process.start(command);
-    if (!process.waitForStarted(timeout)) {
-        return "";
-    }
-
-    if (!process.waitForFinished(timeout)) {
-        process.kill();
-        return "";
-    }
-
-    return process.readAllStandardOutput();
-}
-
-int runCommandWithTimeout(const QString &command, QString &output, int timeout)
-{
-
     // 获取当前环境变量
     QProcessEnvironment originalEnv = QProcessEnvironment::systemEnvironment();
 
@@ -116,7 +95,7 @@ int runCommandWithTimeout(const QString &command, QString &output, int timeout)
     // 设置新的环境变量
     QProcess process;
     process.setProcessEnvironment(tempEnv);
-    process.start(command);
+    process.start(command,args);
     if (!process.waitForStarted(timeout)) {
         return -1;
     }
@@ -127,13 +106,10 @@ int runCommandWithTimeout(const QString &command, QString &output, int timeout)
     }
 
     output = QString::fromLocal8Bit(process.readAllStandardOutput());
-
     // 还原原始环境变量
     process.setProcessEnvironment(originalEnv);
-
     return process.exitCode();
 }
-
 
 double compareImages(const QImage &image1, const QImage &image2)
 {
@@ -186,44 +162,45 @@ void enableWidgetWithDelay(QWidget *widget, int msec)
 
 void eventPause(int msec)
 {
-    // 创建一个事件循环
     QEventLoop eventLoop;
-
-    // 创建一个定时器
-    QTimer timer;
-    timer.setSingleShot(true); // 让定时器只触发一次
-
-    // 连接定时器的超时信号到事件循环的退出槽
-    QObject::connect(&timer, &QTimer::timeout, &eventLoop, &QEventLoop::quit);
-
-    // 启动定时器，2秒后触发超时信号
-    timer.start(msec); // 2000毫秒 = 2秒
-
-    // 进入事件循环，等待2秒
+    QTimer::singleShot(msec,&eventLoop,&QEventLoop::quit);
     eventLoop.exec();
 }
-
 
 // 函数：读取文件内容
 QString readFileContent(const QString &filePath)
 {
-    // 创建一个QFile对象
     QFile file(filePath);
-    // 检查文件是否打开成功
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         PrintErrLog("无法打开文件：" << filePath);
         return QString();
     }
-
-    // 创建一个QTextStream对象来处理文件流
     QTextStream in(&file);
-    // 读取文件所有内容
     QString content = in.readAll();
-
-    // 关闭文件
     file.close();
-    // 返回读取到的内容
     return content;
 }
 
+// 自定义函数比较版本号字符串
+bool compareVersionStrings(const QString& version1, const QString& version2) {
+    QVector<int> parts1;
+    for (const auto& part : version1.split(".")) {
+        parts1.push_back(part.toInt());
+    }
+
+    QVector<int> parts2;
+    for (const auto& part : version2.split(".")) {
+        parts2.push_back(part.toInt());
+    }
+
+    for (int i = 0; i < std::min(parts1.size(), parts2.size()); ++i) {
+        int v1 = parts1[i];
+        int v2 = parts2[i];
+
+        if (v1 != v2) {
+            return v1 > v2;
+        }
+    }
+    return parts1.size() > parts2.size();
+}

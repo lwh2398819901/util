@@ -80,7 +80,9 @@ public:
     getSetString(SoftName, name, "config", "softName") //软件版本
     getSetString(Version, version, "config", "version") //软件版本
     getSetString(Debug, debug, "config", "debug")       //软件功能控制  debug/release/release_test
-
+    getSetString(SingletonProcess, singletonProcess, "config", "singletonProcess")    // 是否为单例进程
+    getSetString(UseNetworkProxy, useNetworkProxy, "config", "useNetworkProxy")     // 是否使用代理网络
+  
     getSetString(DefaultMaxFileSize, maxFileSize, "Log", "defaultMaxFileSize")    //日志文件大小
     getSetString(DefaultMaxFiles, maxFiles, "Log", "defaultMaxFiles")             //日志文件个数
     getSetString(DefaultLevel, level, "Log", "defaultLevel")                      //日志等级

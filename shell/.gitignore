@@ -1,2 +1,4 @@
 *.ini
 user_functions.sh
+./project/*
+project

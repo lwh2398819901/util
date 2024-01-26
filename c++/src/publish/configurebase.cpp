@@ -59,6 +59,8 @@ bool ConfigureBase::readConfig()
     m_values["config"]["softName"] = PRODUCT_NAME;
     m_values["config"]["version"] = GIT_PROJECT_VERSION;
     getValue("config", "debug", "release");
+    getValue("config", "singletonProcess", "yes");
+    getValue("config", "useNetworkProxy", "yes");
     getValue("Log", "defaultMaxFileSize", "104857600");
     getValue("Log", "defaultMaxFiles", "10");
     getValue("Log", "defaultLevel", "info");
@@ -71,7 +73,8 @@ bool ConfigureBase::writeConfig()
     setValue("config", "softName", "");
     setValue("config", "version", "");
     setValue("config", "debug", "release");
-
+    setValue("config", "singletonProcess", "");
+    setValue("config", "useNetworkProxy", "");
     setValue("Log", "defaultMaxFileSize", "104857600");
     setValue("Log", "defaultMaxFiles", "10");
     setValue("Log", "defaultLevel", "info");

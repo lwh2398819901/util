@@ -62,23 +62,27 @@ function create_user_functions_sh() {
     
     echo 'function system_settings() {' >> user_functions.sh
     echo '    echo "用户自定义 系统设置"' >> user_functions.sh
+    echo '    echo "$1"' >> user_functions.sh
     echo '}' >> user_functions.sh
     echo '' >> user_functions.sh
     
     
     echo 'function user_settings() {' >> user_functions.sh
     echo '    echo "用户自定义 用户设置"' >> user_functions.sh
+    echo '    echo "$1"' >> user_functions.sh
     echo '}' >> user_functions.sh
     echo '' >> user_functions.sh
     
     
     echo 'function install_soft() {' >> user_functions.sh
     echo '    echo "用户自定义 安装软件"' >> user_functions.sh
+    echo '    echo "$1"' >> user_functions.sh
     echo '}' >> user_functions.sh
     echo '' >> user_functions.sh
     
     echo 'function uninstall_soft() {' >> user_functions.sh
     echo '    echo "用户自定义 卸载软件"' >> user_functions.sh
+    echo '    echo "$1"' >> user_functions.sh
     echo '}' >> user_functions.sh
     echo '' >> user_functions.sh
     
@@ -244,6 +248,9 @@ function main() {
 # ***************************************** 运行 ********************************************#
 isExit=0
 s_currentDir=$(pwd)
+s_mkDir="$s_currentDir/project"
+mkdir -p $s_mkDir
+cd $s_mkDir
 # 判断配置文件是否存在
 if [ ! -f "./user_functions.sh" ]; then
     create_user_functions_sh
@@ -269,6 +276,8 @@ s_buildDependList=$(read_iniFile_field "project.ini" "buildDependList")
 s_lnName=$(read_iniFile_field "project.ini" "lnName")
 
 create_install_ini
+
+cd $s_currentDir
 
 # 解析命令行参数
 while [[ $# -gt 0 ]]; do

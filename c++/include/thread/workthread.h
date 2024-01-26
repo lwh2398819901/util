@@ -6,7 +6,7 @@
 #include <QObject>
 typedef void (*FunctionPointer)();
 
-enum THREAD_STATUS {
+enum class THREAD_STATUS {
     START,
     BUSY,
     STOP
@@ -29,7 +29,7 @@ signals:
 private:
     FunctionPointer m_func;
     bool m_work{false};
-    THREAD_STATUS m_status{STOP};
+    THREAD_STATUS m_status{THREAD_STATUS::STOP};
 };
 
 

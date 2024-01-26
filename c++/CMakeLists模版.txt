@@ -35,8 +35,8 @@ endif()
 set (PRODUCT_NAME ${PROJECT_NAME})
 
 configure_file(
-    ${CMAKE_SOURCE_DIR}/util/cmake/version.h.in
-    ${CMAKE_SOURCE_DIR}/util/include/publish/version.h
+    ${CMAKE_SOURCE_DIR}/util/c++/cmake/version.h.in
+    ${CMAKE_SOURCE_DIR}/util/c++/include/publish/version.h
     @ONLY
 )
 
@@ -66,31 +66,31 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS REQUIRED
 
 
 set(PROJECT_SOURCES
-        util/configure/configure.h
-        util/configure/configure.cpp
+        util/c++/configure/configure.h
+        util/c++/configure/configure.cpp
 
-        util/include/publish/logger.h
-        util/include/publish/pub_macro.h
-        util/include/publish/configurebase.h
-        util/include/publish/pub_func.h
-        util/include/publish/publish.h
-        util/include/reconnectTcpclient/reconnecttcpclient.h
-        util/include/qtsingleapplication/qtlockedfile.h
-        util/include/qtsingleapplication/qtlocalpeer.h
-        util/include/qtsingleapplication/qtsinglecoreapplication.h
-        util/include/qtsingleapplication/qtsingleapplication.h
-        util/include/thread/workthread.h
-        util/include/networkaccessmanager/networkaccessmanager.h
+        util/c++/include/publish/logger.h
+        util/c++/include/publish/pub_macro.h
+        util/c++/include/publish/configurebase.h
+        util/c++/include/publish/pub_func.h
+        util/c++/include/publish/publish.h
+        util/c++/include/reconnectTcpclient/reconnecttcpclient.h
+        util/c++/include/qtsingleapplication/qtlockedfile.h
+        util/c++/include/qtsingleapplication/qtlocalpeer.h
+        util/c++/include/qtsingleapplication/qtsinglecoreapplication.h
+        util/c++/include/qtsingleapplication/qtsingleapplication.h
+        util/c++/include/thread/workthread.h
+        util/c++/include/networkaccessmanager/networkaccessmanager.h
 
-        util/src/publish/logger.cpp
-        util/src/publish/configurebase.cpp
-        util/src/publish/pub_func.cpp
-        util/src/reconnectTcpclient/reconnecttcpclient.cpp
-        util/src/qtsingleapplication/qtlocalpeer.cpp
-        util/src/qtsingleapplication/qtsingleapplication.cpp
-        util/src/qtsingleapplication/qtsinglecoreapplication.cpp
-        util/src/thread/workthread.cpp
-        util/src/networkaccessmanager/networkaccessmanager.cpp
+        util/c++/src/publish/logger.cpp
+        util/c++/src/publish/configurebase.cpp
+        util/c++/src/publish/pub_func.cpp
+        util/c++/src/reconnectTcpclient/reconnecttcpclient.cpp
+        util/c++/src/qtsingleapplication/qtlocalpeer.cpp
+        util/c++/src/qtsingleapplication/qtsingleapplication.cpp
+        util/c++/src/qtsingleapplication/qtsinglecoreapplication.cpp
+        util/c++/src/thread/workthread.cpp
+        util/c++/src/networkaccessmanager/networkaccessmanager.cpp
 )
 
 
@@ -151,13 +151,13 @@ endif()
 
 
 
-target_include_directories(${PROJECT_NAME} PRIVATE util/configure)
-target_include_directories(${PROJECT_NAME} PRIVATE util/include/publish)
-target_include_directories(${PROJECT_NAME} PRIVATE util/include/reconnectTcpclient)
-target_include_directories(${PROJECT_NAME} PRIVATE util/include/qtsingleapplication)
-target_include_directories(${PROJECT_NAME} PRIVATE util/include/thread)
-target_include_directories(${PROJECT_NAME} PRIVATE util/include/networkaccessmanager)
+target_include_directories(${PROJECT_NAME} PRIVATE util/c++/configure)
+target_include_directories(${PROJECT_NAME} PRIVATE util/c++/include/publish)
+target_include_directories(${PROJECT_NAME} PRIVATE util/c++/include/reconnectTcpclient)
+target_include_directories(${PROJECT_NAME} PRIVATE util/c++/include/qtsingleapplication)
+target_include_directories(${PROJECT_NAME} PRIVATE util/c++/include/thread)
+target_include_directories(${PROJECT_NAME} PRIVATE util/c++/include/networkaccessmanager)
 
 # 第三方库加载
-add_subdirectory(util/3rdpart/spdlog)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/util/3rdpart/spdlog/include)
+add_subdirectory(util/c++/3rdpart/spdlog)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/util/c++/3rdpart/spdlog/include)

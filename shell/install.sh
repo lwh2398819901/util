@@ -165,7 +165,7 @@ function installSoft() {
         echo -e "\e[31m$s_buildType 文件夹不存在\e[0m"
         exit 1
     else
-        copy_files "./$s_buildType/$softName" "$softDir"
+        copy_files ./$s_buildType/* "$softDir"
     fi
     # 复制logo
     if [ ! -f "logo.png" ]; then
@@ -221,7 +221,7 @@ function installSoft() {
         fi
     fi
     
-    install_soft $userName
+    install_soft $userName $softName
     echo "安装完成"
 }
 
@@ -253,7 +253,7 @@ function uninstallSoft() {
         echo "安装目录 $softDir 不存在"
     fi
     
-    uninstall_soft $userName
+    uninstall_soft $userName $softName
     echo "卸载完成"
 }
 

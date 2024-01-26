@@ -116,13 +116,13 @@ function create_project_ini() {
     echo -e "\e[31m配置文件不存在，创建配置文件\e[0m"
     touch project.ini
     
-    local script_src=$(cd "../../" && pwd)
+    local script_src=$(cd "../../../" && pwd)
     local script_build=$(cd "$script_src/../" && pwd)
     local script_root=$(cd "$script_build/../" && pwd)
     
     # 判断配置文件是否存在
     if [ -f "$script_src/resource/install/project.ini" ]; then
-        copy_files "$script_src/resource/install/project.ini" ./
+        copy_files $script_src/resource/install/project.ini ./
         return 0
     fi
     
@@ -206,6 +206,8 @@ function build_and_copy_software() {
         echo -e "\e[31m复制 install.sh 文件失败\e[0m"
         exit 1
     fi
+
+    rm -rf $s_targetDir/project.ini
 }
 
 function create_zip_file() {
@@ -248,23 +250,49 @@ function main() {
 # ***************************************** 运行 ********************************************#
 isExit=0
 s_currentDir=$(pwd)
-s_mkDir="$s_currentDir/project"
-mkdir -p $s_mkDir
-cd $s_mkDir
-# 判断配置文件是否存在
+s_iniDir="$s_currentDir/project_conf"
+s_resourceDir=$s_currentDir/../../resource/   # 默认资源路径
+create_dir $s_resourceDir
+create_dir $s_resourceDir/install
+create_dir $s_resourceDir/project_conf
+create_dir $s_iniDir
+
+cd $s_iniDir
+# 判断用户脚本是否存在
 if [ ! -f "./user_functions.sh" ]; then
-    create_user_functions_sh
+    if [ ! -f "$s_resourceDir/install/user_functions.sh" ]; then
+        create_user_functions_sh
+        copy_files ./user_functions.sh $s_resourceDir/install/
+        isExit=1
+    else 
+        copy_files $s_resourceDir/install/user_functions.sh ./
+    fi
 fi
+
+if [ ! -f "$s_resourceDir/install/user_functions.sh" ]; then
+    copy_files ./user_functions.sh $s_resourceDir/install/
+    isExit=1
+fi
+
 
 # 判断配置文件是否存在
 if [ ! -f "./project.ini" ]; then
-    create_project_ini
-    echo "请检查配置文件后，再次运行"
+    if [ ! -f "$s_resourceDir/project_conf/project.ini" ]; then
+        create_project_ini
+        copy_files ./project.ini $s_resourceDir/project_conf
+        isExit=1
+    else 
+        copy_files $s_resourceDir/project_conf/project.ini ./
+    fi
+fi
+
+if [ ! -f "$s_resourceDir/project_conf/project.ini" ]; then
+    copy_files ./project.ini $s_resourceDir/project_conf
     isExit=1
 fi
 
 # 设置默认值 全局变量使用s_开头
-s_softName=$(read_iniFile_field "project.ini" "softName")       # 软件名称  appName
+s_softName=$(read_iniFile_field "project.ini" "softName")       # 软件名称      appName
 s_sourceDir=$(read_iniFile_field "project.ini" "sourceDir")     # 源码目录      /home/test/sourceDir
 s_buildDir=$(read_iniFile_field "project.ini" "buildDir")       # 构建目录      /home/test/buildDir
 s_targetDir=$(read_iniFile_field "project.ini" "targetDir")     # 目标目录      /home/test/amd64
@@ -276,6 +304,7 @@ s_buildDependList=$(read_iniFile_field "project.ini" "buildDependList")
 s_lnName=$(read_iniFile_field "project.ini" "lnName")
 
 create_install_ini
+copy_files ./install.ini $s_resourceDir/install/
 
 cd $s_currentDir
 
@@ -312,6 +341,7 @@ done
 
 
 if [[ $isExit -eq 1 ]]; then
+    echo "请检查配置文件后，再次运行"
     exit 1
 fi
 

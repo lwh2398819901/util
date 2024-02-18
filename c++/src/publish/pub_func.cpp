@@ -7,11 +7,28 @@
 #include <QJsonParseError>
 #include <QJsonValue>
 #include <QProcess>
-#include <QUrlQuery>
 #include <QTimer>
 #include <QWidget>
 #include <QEventLoop>
 #include <QVector>
+#include <qglobal.h>
+#include <QDateTime>
+
+#if defined(Q_OS_WIN)
+
+#elif defined(Q_OS_LINUX)
+#include <unistd.h>
+#include <errno.h>
+#elif defined(Q_OS_MAC)
+
+#elif defined(Q_OS_ANDROID)
+
+#elif defined(Q_OS_IOS)
+
+#elif defined(Q_OS_UNIX)
+
+#endif
+
 
 bool byteArray2JsonOBj(const QByteArray &reply_data, QJsonObject &obj)
 {
@@ -154,6 +171,10 @@ bool scalImageSize(QString filePath)
 
 void enableWidgetWithDelay(QWidget *widget, int msec)
 {
+    if(!widget){
+        return ;
+    }
+
     widget->setEnabled(false);
     QTimer::singleShot(msec, nullptr, [ = ]() {
         widget->setEnabled(true);
@@ -203,4 +224,20 @@ bool compareVersionStrings(const QString& version1, const QString& version2) {
         }
     }
     return parts1.size() > parts2.size();
+}
+
+bool createSymbolicLink(const QString &source, const QString &linkPath)
+{
+    const char *src = source.toUtf8().constData();
+    const char *lnk = linkPath.toUtf8().constData();
+#if defined(Q_OS_LINUX)
+    int result = symlink(src, lnk);
+    if (result == -1) {
+        perror("Error creating symbolic link:");
+        LOGGER_ERR( QString("Error creating symbolic link: ")+ strerror(errno));
+        return false;
+    }
+    return true;
+#endif
+    return false;
 }

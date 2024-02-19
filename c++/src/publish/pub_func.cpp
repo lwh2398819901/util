@@ -75,6 +75,21 @@ bool hasKey(const QJsonObject &obj, QString key, int &value)
     return true;
 }
 
+QString readFileContent(const QString &filePath)
+{
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        PrintErrLog("无法打开文件：" << filePath);
+        return QString();
+    }
+    QTextStream in(&file);
+    QString content = in.readAll();
+    file.close();
+    return content;
+}
+
+
 QDateTime getCreationDate(const QString &path)
 {
     QFileInfo fileInfo(path);
@@ -84,49 +99,22 @@ QDateTime getCreationDate(const QString &path)
     return QDateTime();
 }
 
-QString generateUuid(QStringList list)
+bool createSymbolicLink(const QString &source, const QString &linkPath)
 {
-    QString uniqueString;
-    foreach (QString str, list) {
-        uniqueString += str;
+    const char *src = source.toUtf8().constData();
+    const char *lnk = linkPath.toUtf8().constData();
+#if defined(Q_OS_LINUX)
+    int result = symlink(src, lnk);
+    if (result == -1) {
+        perror("Error creating symbolic link:");
+        LOGGER_ERR( QString("Error creating symbolic link: ")+ strerror(errno));
+        return false;
     }
-    QByteArray hash = QCryptographicHash::hash(uniqueString.toUtf8(), QCryptographicHash::Md5);
-    return hash.toHex();
+    return true;
+#endif
+    return false;
 }
 
-void runCommandDetached(const QString &command,const QStringList& args)
-{
-    QProcess::startDetached(command,args);
-}
-
-int runCommandWithTimeout(const QString &command,const QStringList& args, QString &output, int timeout)
-{
-    // 获取当前环境变量
-    QProcessEnvironment originalEnv = QProcessEnvironment::systemEnvironment();
-
-    // 创建一个新的环境变量对象
-    QProcessEnvironment tempEnv = originalEnv;
-    tempEnv.insert("LANG", "en_US.UTF-8");
-    tempEnv.insert("LC_ALL", "en_US.UTF-8");
-
-    // 设置新的环境变量
-    QProcess process;
-    process.setProcessEnvironment(tempEnv);
-    process.start(command,args);
-    if (!process.waitForStarted(timeout)) {
-        return -1;
-    }
-
-    if (!process.waitForFinished(timeout)) {
-        process.kill();
-        return -1;
-    }
-
-    output = QString::fromLocal8Bit(process.readAllStandardOutput());
-    // 还原原始环境变量
-    process.setProcessEnvironment(originalEnv);
-    return process.exitCode();
-}
 
 double compareImages(const QImage &image1, const QImage &image2)
 {
@@ -169,6 +157,42 @@ bool scalImageSize(QString filePath)
     return true;
 }
 
+
+void runCommandDetached(const QString &command,const QStringList& args)
+{
+    QProcess::startDetached(command,args);
+}
+
+int runCommandWithTimeout(const QString &command,const QStringList& args, QString &output, int timeout)
+{
+    // 获取当前环境变量
+    QProcessEnvironment originalEnv = QProcessEnvironment::systemEnvironment();
+
+    // 创建一个新的环境变量对象
+    QProcessEnvironment tempEnv = originalEnv;
+    tempEnv.insert("LANG", "en_US.UTF-8");
+    tempEnv.insert("LC_ALL", "en_US.UTF-8");
+
+    // 设置新的环境变量
+    QProcess process;
+    process.setProcessEnvironment(tempEnv);
+    process.start(command,args);
+    if (!process.waitForStarted(timeout)) {
+        return -1;
+    }
+
+    if (!process.waitForFinished(timeout)) {
+        process.kill();
+        return -1;
+    }
+
+    output = QString::fromLocal8Bit(process.readAllStandardOutput());
+    // 还原原始环境变量
+    process.setProcessEnvironment(originalEnv);
+    return process.exitCode();
+}
+
+
 void enableWidgetWithDelay(QWidget *widget, int msec)
 {
     if(!widget){
@@ -188,19 +212,15 @@ void eventPause(int msec)
     eventLoop.exec();
 }
 
-// 函数：读取文件内容
-QString readFileContent(const QString &filePath)
+
+QString generateUuid(QStringList list)
 {
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        PrintErrLog("无法打开文件：" << filePath);
-        return QString();
+    QString uniqueString;
+    foreach (QString str, list) {
+        uniqueString += str;
     }
-    QTextStream in(&file);
-    QString content = in.readAll();
-    file.close();
-    return content;
+    QByteArray hash = QCryptographicHash::hash(uniqueString.toUtf8(), QCryptographicHash::Md5);
+    return hash.toHex();
 }
 
 // 自定义函数比较版本号字符串
@@ -226,18 +246,3 @@ bool compareVersionStrings(const QString& version1, const QString& version2) {
     return parts1.size() > parts2.size();
 }
 
-bool createSymbolicLink(const QString &source, const QString &linkPath)
-{
-    const char *src = source.toUtf8().constData();
-    const char *lnk = linkPath.toUtf8().constData();
-#if defined(Q_OS_LINUX)
-    int result = symlink(src, lnk);
-    if (result == -1) {
-        perror("Error creating symbolic link:");
-        LOGGER_ERR( QString("Error creating symbolic link: ")+ strerror(errno));
-        return false;
-    }
-    return true;
-#endif
-    return false;
-}

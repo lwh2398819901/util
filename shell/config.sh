@@ -109,11 +109,6 @@ function create_project_ini() {
     local script_build=$(cd "$script_src/../" && pwd)
     local script_root=$(cd "$script_build/../" && pwd)
 
-    # 判断配置文件是否存在
-    if [ -f "$script_src/resource/install/project.ini" ]; then
-        copy_files $script_src/resource/install/project.ini ./
-        return 0
-    fi
 
     # 根据当前脚本位置构建其他路径
     local softName=$(basename $script_src)
@@ -141,6 +136,41 @@ function create_project_ini() {
     echo "lnName=${lnName}" >>project.ini
 
     print_success "配置文件创建成功"
+}
+
+function change_Project_Ini() {
+    local script_src=$(cd "../../../" && pwd)
+    local script_build=$(cd "$script_src/../" && pwd)
+    local script_root=$(cd "$script_build/../" && pwd)
+
+    # 设置默认值 全局变量使用s_开头
+    local softName=$(basename $script_src)
+    local sourceDir="${script_src}"
+    local buildDir="${script_build}/build-$softName-unknown-Release"
+    local targetDir="${script_root}/amd64"
+    local zipPath="${script_root}"
+    local buildType=$(read_iniFile_field "project.ini" "buildType") # 构建类型，默认为 Release
+    local userName=$(read_iniFile_field "project.ini" "userName")
+    local dependList=$(read_iniFile_field "project.ini" "dependList")
+    local buildDependList=$(read_iniFile_field "project.ini" "buildDependList")
+    local lnName=$(read_iniFile_field "project.ini" "lnName")
+
+     # 将这些信息写入到project.ini文件
+    echo "[project]" >project.ini
+    echo "softName=${softName}" >>project.ini
+    echo "sourceDir=${sourceDir}" >>project.ini
+    echo "buildDir=${buildDir}" >>project.ini
+    echo "targetDir=${targetDir}" >>project.ini
+    echo "zipPath=${zipPath}" >>project.ini
+    echo "buildType=${buildType}" >>project.ini
+    echo "userName=${userName}" >>project.ini
+    echo "dependList=${dependList}" >>project.ini
+    echo "buildDependList=${buildDependList}" >>project.ini
+    echo "lnName=${lnName}" >>project.ini
+
+    print_success "配置文件修改成功"
+
+
 }
 
 function build_and_copy_software() {
@@ -268,18 +298,14 @@ if [ ! -f "./project.ini" ]; then
     if [ ! -f "$s_resourceDir/project_conf/project.ini" ]; then
         print_warning "用户保存的默认配置文件也不存在，将创建默认配置"
         create_project_ini
-        copy_files ./project.ini $s_resourceDir/project_conf
         isExit=1
     else
         print_warning "用户保存的默认配置文件存在，将使用用户保存的默认配置"
         copy_files $s_resourceDir/project_conf/project.ini ./
+        change_Project_Ini
     fi
 fi
 
-if [ ! -f "$s_resourceDir/project_conf/project.ini" ]; then
-    copy_files ./project.ini $s_resourceDir/project_conf
-    isExit=1
-fi
 
 # 设置默认值 全局变量使用s_开头
 s_softName=$(read_iniFile_field "project.ini" "softName")   # 软件名称      appName

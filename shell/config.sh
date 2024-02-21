@@ -4,18 +4,18 @@ source ./util.sh
 # ***************************************** 函数定义 ********************************************#
 
 function help() {
-    print_info "Usage: ./config.sh [options]"
-    print_info "Options:"
-    print_info "  -h, --help     显示本帮助文档并退出"
-    print_info "  -c, --clean    清理目标目录"
-    print_info "  -C, --cleanAll 清理构建目录和目标目录"
-    print_info "  -s, --settings 打开设置文件，配置脚本设置"
-    print_info ""
-    print_info "Example:"
-    print_info "  ./config.sh -c"
-    print_info "  ./config.sh -C"
-    print_info "  ./config.sh -s"
-    print_info "  ./config.sh "
+    echo "Usage: ./config.sh [options]"
+    echo "Options:"
+    echo "  -h, --help     显示本帮助文档并退出"
+    echo "  -c, --clean    清理目标目录"
+    echo "  -C, --cleanAll 清理构建目录和目标目录"
+    echo "  -s, --settings 打开设置文件，配置脚本设置"
+    echo ""
+    echo "Example:"
+    echo "  ./config.sh -c"
+    echo "  ./config.sh -C"
+    echo "  ./config.sh -s"
+    echo "  ./config.sh "
     exit 0
 }
 
@@ -62,12 +62,28 @@ function create_user_functions_sh() {
     echo '}' >>user_functions.sh
     echo '' >>user_functions.sh
 
+    echo 'function install_soft_pre() {' >>user_functions.sh
+    echo '    print_info "用户自定义 安装软件 前调用"' >>user_functions.sh
+    echo '    print_info "userName: $1"' >>user_functions.sh
+    echo '    print_info "softName: $2"' >>user_functions.sh
+    echo '}' >>user_functions.sh
+    echo '' >>user_functions.sh
+
+
     echo 'function install_soft() {' >>user_functions.sh
     echo '    print_info "用户自定义 安装软件"' >>user_functions.sh
     echo '    print_info "userName: $1"' >>user_functions.sh
     echo '    print_info "softName: $2"' >>user_functions.sh
     echo '}' >>user_functions.sh
     echo '' >>user_functions.sh
+
+    echo 'function uninstall_soft_pre() {' >>user_functions.sh
+    echo '    print_info "用户自定义 卸载软件 前调用"' >>user_functions.sh
+    echo '    print_info "userName: $1"' >>user_functions.sh
+    echo '    print_info "softName: $2"' >>user_functions.sh
+    echo '}' >>user_functions.sh
+    echo '' >>user_functions.sh
+
 
     echo 'function uninstall_soft() {' >>user_functions.sh
     echo '    print_info "用户自定义 卸载软件"' >>user_functions.sh

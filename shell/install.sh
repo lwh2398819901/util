@@ -7,28 +7,28 @@ source ./util.sh
 source ./user_functions.sh
 # ***************************************** 函数定义 ********************************************#
 function help() {
-    print_info "Usage: ./install.sh [OPTIONS]"
-    print_info "Options:"
-    print_info "  -h, --help                                      显示本帮助文档并退出"
-    print_info "  -A, --allSettings                               安装依赖 + 系统设置 需要root权限"
-    print_info "  -a, --allUserSettings                           用户系统设置 + 安装软件 不要使用sudo或root用户执行"
-    print_info "  -S, --systemSettings                            系统设置 需要root权限"
-    print_info "  -s, --userSettings                              用户系统设置 不要使用sudo或root用户执行"
-    print_info "  -B, --installBuildDepends                       安装编译依赖 仅开发环境需要安装 用户请勿安装 使用sudo或root用户执行"
-    print_info "  -b, --uninstallBuildDepends                     卸载编译依赖 使用sudo或root用户执行"
-    print_info "  -I, --installDepends                            安装依赖 使用sudo或root用户执行"
-    print_info "  -U, --uninstallDepends                          卸载依赖 使用sudo或root用户执行"
-    print_info "  -i, --installSoft                               安装软件 不要使用sudo或root用户执行"
-    print_info "  -u, --uninstallSoft                             卸载软件 不要使用sudo或root用户执行"
-    print_info ""
-    print_info ""
-    print_info "首次安装请使用 -A 安装依赖和系统设置，设置后无需重复设置"
-    print_info "之后请使用 -a 选项设置用户系统设置及安装软件，设置后无需重复设置"
-    print_info "首次安装示例流程:"
-    print_info "sudo bash ./install.sh -A  (不要重启)"
-    print_info "bash ./install.sh -a  (重启)"
-    print_info ""
-    print_info "升级软件请使用 -i 选项安装或升级软件"
+    echo "Usage: ./install.sh [OPTIONS]"
+    echo "Options:"
+    echo "  -h, --help                                      显示本帮助文档并退出"
+    echo "  -A, --allSettings                               安装依赖 + 系统设置 需要root权限"
+    echo "  -a, --allUserSettings                           用户系统设置 + 安装软件 不要使用sudo或root用户执行"
+    echo "  -S, --systemSettings                            系统设置 需要root权限"
+    echo "  -s, --userSettings                              用户系统设置 不要使用sudo或root用户执行"
+    echo "  -B, --installBuildDepends                       安装编译依赖 仅开发环境需要安装 用户请勿安装 使用sudo或root用户执行"
+    echo "  -b, --uninstallBuildDepends                     卸载编译依赖 使用sudo或root用户执行"
+    echo "  -I, --installDepends                            安装依赖 使用sudo或root用户执行"
+    echo "  -U, --uninstallDepends                          卸载依赖 使用sudo或root用户执行"
+    echo "  -i, --installSoft                               安装软件 不要使用sudo或root用户执行"
+    echo "  -u, --uninstallSoft                             卸载软件 不要使用sudo或root用户执行"
+    echo ""
+    echo ""
+    echo "首次安装请使用 -A 安装依赖和系统设置，设置后无需重复设置"
+    echo "之后请使用 -a 选项设置用户系统设置及安装软件，设置后无需重复设置"
+    echo "首次安装示例流程:"
+    echo "sudo bash ./install.sh -A  (不要重启)"
+    echo "bash ./install.sh -a  (重启)"
+    echo ""
+    echo "升级软件请使用 -i 选项安装或升级软件"
     exit 0
 }
 
@@ -134,6 +134,8 @@ function userSettings() {
 
 # 安装软件 使用普通用户安装 root用户警告
 function installSoft() {
+    install_soft_pre $s_userName $s_softName
+    
     if [[ $EUID -eq 0 ]]; then
         print_warning "当前使用root用户安装，建议使用普通用户安装"
         read -rsp $'按回车键继续... 或者 ctrl + c 结束安装\n'
@@ -225,6 +227,7 @@ function installSoft() {
 
 # 卸载软件
 function uninstallSoft() {
+    uninstall_soft_pre $s_userName $s_softName
     local userName=$s_userName
     local softName=$s_softName
     # 删除应用程序和桌面快捷方式

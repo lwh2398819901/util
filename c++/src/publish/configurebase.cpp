@@ -85,8 +85,7 @@ bool ConfigureBase::writeConfig()
 
 void ConfigureBase::getValue(QString field, QString key, QString defaultValue)
 {
-    QString value = m_ini->value(field + "/" + key).toString();
-    m_values[field][key] = value.isEmpty() ? defaultValue : value;
+    m_values[field][key] = m_ini->value(field + "/" + key,defaultValue).toString();
 }
 
 void ConfigureBase::setValue(QString field, QString key, QString unUsed)

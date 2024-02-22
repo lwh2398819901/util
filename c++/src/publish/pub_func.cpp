@@ -90,6 +90,38 @@ QString readFileContent(const QString &filePath)
 }
 
 
+bool createFile(const QString &filePath, const QString &content) {
+    QFile file(filePath);
+    if (file.exists()) {
+        return true;
+    }
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        PrintErrLog("无法创建文件：" << filePath);
+        return false;
+    }
+    QTextStream out(&file);
+    out << content;
+    file.close();
+    return true;
+
+}
+
+
+bool appendFile(const QString &filePath, const QString &content) {
+    QFile file(filePath);
+    if (!file.open(QIODevice::Append | QIODevice::Text)) {
+        PrintErrLog("无法打开文件：" << filePath);
+        return false;
+    }
+    QTextStream out(&file);
+    out << content;
+    file.close();
+    return true;
+}
+
+
+
+
 QDateTime getCreationDate(const QString &path)
 {
     QFileInfo fileInfo(path);

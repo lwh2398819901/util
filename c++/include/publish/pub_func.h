@@ -49,6 +49,23 @@ bool hasKey(const QJsonObject &obj, QString key, int &value);
 QString readFileContent(const QString &filePath);
 
 /**
+ * @brief 创建文件
+ * @param filePath 文件路径
+ * @param content[out] 文件内容
+ * @return 如果成功则返回true，否则返回false
+*/
+bool createFile(const QString &filePath, const QString &content="");
+
+/**
+ * @brief 追加文件内容
+ * @param filePath 文件路径
+ * @param content 文件内容
+ * @return 如果成功则返回true，否则返回false
+ */
+bool appendFile(const QString &filePath, const QString &content="");
+
+
+/**
  * @brief 获取文件的创建日期
  * @param path 文件路径
  * @return 文件的创建日期

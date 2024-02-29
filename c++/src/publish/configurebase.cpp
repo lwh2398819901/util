@@ -70,15 +70,15 @@ bool ConfigureBase::readConfig()
 
 bool ConfigureBase::writeConfig()
 {
-    setValue("config", "softName", "");
-    setValue("config", "version", "");
-    setValue("config", "debug", "release");
-    setValue("config", "singletonProcess", "");
-    setValue("config", "useNetworkProxy", "");
-    setValue("Log", "defaultMaxFileSize", "104857600");
-    setValue("Log", "defaultMaxFiles", "10");
-    setValue("Log", "defaultLevel", "info");
-    setValue("Log", "defaultFilePath", "./logs/log.log");
+    setValue("config", "softName");
+    setValue("config", "version");
+    setValue("config", "debug");
+    setValue("config", "singletonProcess");
+    setValue("config", "useNetworkProxy");
+    setValue("Log", "defaultMaxFileSize");
+    setValue("Log", "defaultMaxFiles");
+    setValue("Log", "defaultLevel");
+    setValue("Log", "defaultFilePath");
     m_ini->sync();
     return true;
 }
@@ -88,8 +88,13 @@ void ConfigureBase::getValue(QString field, QString key, QString defaultValue)
     m_values[field][key] = m_ini->value(field + "/" + key,defaultValue).toString();
 }
 
-void ConfigureBase::setValue(QString field, QString key, QString unUsed)
+void ConfigureBase::setValue(QString field, QString key, QString value)
 {
-    Q_UNUSED(unUsed);
+    m_values[field][key] = value;
+    m_ini->setValue(field + "/" + key, m_values[field][key]);
+}
+
+void ConfigureBase::setValue(QString field, QString key)
+{
     m_ini->setValue(field + "/" + key, m_values[field][key]);
 }

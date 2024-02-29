@@ -73,8 +73,8 @@ public:
     bool readConfig();
     bool writeConfig();
     void getValue(QString field, QString key, QString defaultValue);
-    void setValue(QString field, QString key, QString unUsed);
-
+    void setValue(QString field, QString key, QString value);
+    void setValue(QString field, QString key);
 //所有的配置属性代码在这下面填写
 //以下为每个工程公共的属性
     getSetString(SoftName, name, "config", "softName") //软件版本

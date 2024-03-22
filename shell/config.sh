@@ -244,13 +244,14 @@ function create_zip_file() {
     cd "$s_sourceDir"
     local current_date=$(date +"%m.%d")
     local current_tag=$(git describe --tags --abbrev=0)
+    local current_branch=$(git rev-parse --abbrev-ref HEAD)  
 
     if [ -z "$current_tag" ]; then
         current_tag=$(date +"%H%M%S")
     fi
 
     cd "$s_targetDir"
-    local zip_file_name="${s_softName}_${current_tag}_${s_buildType}_${current_date}.zip"
+    local zip_file_name="${s_softName}_${current_branch}_${current_tag}_${s_buildType}_${current_date}.zip"
     zip -r "$s_zipFilePath/$zip_file_name" "."
     if [ $? -ne 0 ]; then
         print_error "创建压缩包失败"

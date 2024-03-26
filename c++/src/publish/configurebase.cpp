@@ -70,22 +70,29 @@ bool ConfigureBase::readConfig()
 
 bool ConfigureBase::writeConfig()
 {
-    setValue("config", "softName");
-    setValue("config", "version");
-    setValue("config", "debug");
-    setValue("config", "singletonProcess");
-    setValue("config", "useNetworkProxy");
-    setValue("Log", "defaultMaxFileSize");
-    setValue("Log", "defaultMaxFiles");
-    setValue("Log", "defaultLevel");
-    setValue("Log", "defaultFilePath");
+    QMap<QString, QMap<QString, QString>>::iterator outerIterator;
+    QMap<QString, QString>::iterator innerIterator;
+
+    for (outerIterator = m_values.begin(); outerIterator != m_values.end(); ++outerIterator) {
+        // 访问外层map的键
+        QString outerKey = outerIterator.key();
+
+        // 遍历内层map
+        for (innerIterator = outerIterator.value().begin(); innerIterator != outerIterator.value().end(); ++innerIterator) {
+            // 访问内层map的键和值
+            QString innerKey = innerIterator.key();
+            QString innerValue = innerIterator.value();
+            setValue(outerKey,innerKey);
+        }
+    }
     m_ini->sync();
     return true;
 }
 
-void ConfigureBase::getValue(QString field, QString key, QString defaultValue)
+QString ConfigureBase::getValue(QString field, QString key, QString defaultValue)
 {
     m_values[field][key] = m_ini->value(field + "/" + key,defaultValue).toString();
+    return m_values[field][key];
 }
 
 void ConfigureBase::setValue(QString field, QString key, QString value)

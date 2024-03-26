@@ -72,7 +72,7 @@ public:
     ~ConfigureBase();
     bool readConfig();
     bool writeConfig();
-    void getValue(QString field, QString key, QString defaultValue);
+    QString getValue(QString field, QString key, QString defaultValue);
     void setValue(QString field, QString key, QString value);
     void setValue(QString field, QString key);
 //所有的配置属性代码在这下面填写

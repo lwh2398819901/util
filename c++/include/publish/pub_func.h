@@ -155,4 +155,13 @@ bool compareVersionStrings(const QString& version1, const QString& version2);
 bool checkNetworkConnection(const QString &url, uint msec = 30000);
 
 
+/**
+ * @brief 消息窗口 自动隐藏
+ * @param title 标题
+ * @param text 消息内容
+ * @param msec 显示时间 默认是3000 单位毫秒
+ */
+void showAutoCloseMessageBox(const QString& title, const QString& text, int msec = 5000);
+
+
 #endif // PUB_FUNC_H

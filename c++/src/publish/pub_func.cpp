@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QMessageBox>
 #elif defined(Q_OS_MAC)
 
 #elif defined(Q_OS_ANDROID)
@@ -326,3 +327,13 @@ bool checkNetworkConnection(const QString &url, uint msec)
     }
 }
 
+
+void showAutoCloseMessageBox(const QString &title, const QString &text, int msec) {
+    QMessageBox* msgBox = new QMessageBox(QMessageBox::Information, title, text, QMessageBox::NoButton, 0, Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+    msgBox->setAttribute(Qt::WA_DeleteOnClose, true);
+    msgBox->show();
+
+    eventPause(msec);
+    msgBox->close();
+    delete msgBox;
+}

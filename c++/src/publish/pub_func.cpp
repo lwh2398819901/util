@@ -19,6 +19,8 @@
 #elif defined(Q_OS_LINUX)
 #include <unistd.h>
 #include <errno.h>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 #elif defined(Q_OS_MAC)
 
 #elif defined(Q_OS_ANDROID)
@@ -276,5 +278,51 @@ bool compareVersionStrings(const QString& version1, const QString& version2) {
         }
     }
     return parts1.size() > parts2.size();
+}
+
+
+
+bool checkNetworkConnection(const QString &url, uint msec)
+{
+    QUrl urlObj(url);
+    if(!urlObj.isValid()){
+        LOGGER_DEBUG("无效的url:"+url);
+        return false;
+    }
+
+    if(msec<=0){
+        LOGGER_DEBUG("无效的时间设置");
+        return false;
+    }
+
+    QNetworkAccessManager manager;
+    QNetworkRequest request;
+    request.setUrl(url);
+
+    QNetworkReply *reply = manager.get(request);
+    QTimer timer;
+    QEventLoop loop;
+
+    timer.setSingleShot(true);
+    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+
+    timer.start(msec); // 设置超时时间
+    loop.exec();
+
+    if (timer.isActive()) {
+        timer.stop();  // 如果在规定时间内得到了回复则停止计时
+        if (reply->error() == QNetworkReply::NoError) {
+            LOGGER_DEBUG("网络正常连接");
+            return true;
+        } else {
+            LOGGER_DEBUG("网络连接错误: " + reply->errorString());
+            return false;
+        }
+    } else {
+        reply->abort();  // 请求超时，终止请求
+        LOGGER_DEBUG("网络请求超时，终止请求");
+        return false;
+    }
 }
 

@@ -44,7 +44,7 @@ bool hasKey(const QJsonObject &obj, QString key, int &value);
 /**
  * @brief 读取指定文件的内容
  * @param filePath 文件路径
- * @return 文件内容作为字符串
+ * @return 文件内容字符串  注意 这个函数没有考虑文件大小的问题，所以最好不要用来读取大文件
  */
 QString readFileContent(const QString &filePath);
 
@@ -57,7 +57,7 @@ QString readFileContent(const QString &filePath);
 bool createFile(const QString &filePath, const QString &content="");
 
 /**
- * @brief 追加文件内容
+ * @brief 追加文件内容，没有文件则自动创建
  * @param filePath 文件路径
  * @param content 文件内容
  * @return 如果成功则返回true，否则返回false
@@ -131,11 +131,19 @@ void enableWidgetWithDelay(QWidget *widget, int msec = 1000);
 void eventPause(int msec);
 
 /**
- * @brief 生成字符串的哈希值
+ * @brief 生成字符列表的哈希值
  * @param list 字符串列表
- * @return 哈希值
+ * @return md5数值
  */
 QString generateUuid(QStringList list);
+
+/**
+ * @brief 生成字符串的md5
+ * @param list 字符串列表
+ * @return md5数值
+ */
+QString calculateMD5(const QString &text);
+
 
 /**
  * @brief 比较版本号字符串

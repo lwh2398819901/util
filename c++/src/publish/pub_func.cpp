@@ -123,8 +123,6 @@ bool appendFile(const QString &filePath, const QString &content) {
 }
 
 
-
-
 QDateTime getCreationDate(const QString &path)
 {
     QFileInfo fileInfo(path);
@@ -254,8 +252,12 @@ QString generateUuid(QStringList list)
     foreach (QString str, list) {
         uniqueString += str;
     }
-    QByteArray hash = QCryptographicHash::hash(uniqueString.toUtf8(), QCryptographicHash::Md5);
-    return hash.toHex();
+    return calculateMD5(uniqueString);
+}
+
+QString calculateMD5(const QString &text) {
+    QByteArray hashBytes = QCryptographicHash::hash(text.toUtf8(), QCryptographicHash::Md5);
+    return hashBytes.toHex(); // Convert the hash result to hexadecimal representation
 }
 
 // 自定义函数比较版本号字符串
@@ -280,8 +282,6 @@ bool compareVersionStrings(const QString& version1, const QString& version2) {
     }
     return parts1.size() > parts2.size();
 }
-
-
 
 bool checkNetworkConnection(const QString &url, uint msec)
 {
@@ -314,15 +314,17 @@ bool checkNetworkConnection(const QString &url, uint msec)
     if (timer.isActive()) {
         timer.stop();  // 如果在规定时间内得到了回复则停止计时
         if (reply->error() == QNetworkReply::NoError) {
-            LOGGER_DEBUG("网络正常连接");
+            reply->deleteLater();
             return true;
         } else {
             LOGGER_DEBUG("网络连接错误: " + reply->errorString());
+            reply->deleteLater();
             return false;
         }
     } else {
         reply->abort();  // 请求超时，终止请求
         LOGGER_DEBUG("网络请求超时，终止请求");
+        reply->deleteLater();
         return false;
     }
 }
@@ -337,3 +339,5 @@ void showAutoCloseMessageBox(const QString &title, const QString &text, int msec
     msgBox->close();
     delete msgBox;
 }
+
+

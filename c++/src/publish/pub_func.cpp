@@ -22,6 +22,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QMessageBox>
+#include <QNetworkCookieJar>
 #elif defined(Q_OS_MAC)
 
 #elif defined(Q_OS_ANDROID)
@@ -285,22 +286,46 @@ bool compareVersionStrings(const QString& version1, const QString& version2) {
 
 bool checkNetworkConnection(const QString &url, uint msec)
 {
+    static int i =0;
+    static int j =0;
+    static QNetworkCookieJar jar;
+    static QNetworkAccessManager manager;
+    manager.setCookieJar(&jar);
+    manager.setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
+
+    i++;
+
     QUrl urlObj(url);
     if(!urlObj.isValid()){
-        LOGGER_DEBUG("无效的url:"+url);
         return false;
     }
 
-    if(msec<=0){
-        LOGGER_DEBUG("无效的时间设置");
-        return false;
-    }
-
-    QNetworkAccessManager manager;
+    // 创建自定义请求
     QNetworkRequest request;
+    // 设置请求的头部
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, true);
+    request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
     request.setUrl(url);
+//    request.setRawHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
+//    request.setRawHeader("Accept-Encoding", "gzip, deflate, br");
+//    request.setRawHeader("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8,en-US;q=0.7");
+//    request.setRawHeader("Cache-Control", "max-age=0");
+//    request.setRawHeader("Connection", "keep-alive");
+//    request.setRawHeader("Host", "www.cmccpark.cn");
+//    request.setRawHeader("Sec-Fetch-Dest", "document");
+//    request.setRawHeader("Sec-Fetch-Mode", "navigate");
+//    request.setRawHeader("Sec-Fetch-Site", "none");
+//    request.setRawHeader("Sec-Fetch-User", "?1");
+//    request.setRawHeader("Upgrade-Insecure-Requests", "1");
+//    request.setRawHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.0");
+//    request.setRawHeader("sec-ch-ua", "\"Not A(Brand\";v=\"99\", \"Microsoft Edge\";v=\"121\", \"Chromium\";v=\"121\"");
+//    request.setRawHeader("sec-ch-ua-mobile", "?0");
+//    request.setRawHeader("sec-ch-ua-platform", "\"Linux\"");
+//    request.setRawHeader("Authorization", "Basic c2FiZXI6c2FiZXJfc2VjcmV0");
 
-    QNetworkReply *reply = manager.get(request);
+    // 发送请求
+    QNetworkReply* reply = manager.get(request);
     QTimer timer;
     QEventLoop loop;
 
@@ -311,23 +336,30 @@ bool checkNetworkConnection(const QString &url, uint msec)
     timer.start(msec); // 设置超时时间
     loop.exec();
 
+    // 处理请求结果
     if (timer.isActive()) {
-        timer.stop();  // 如果在规定时间内得到了回复则停止计时
-        if (reply->error() == QNetworkReply::NoError) {
+        timer.stop();
+        if (reply->error() != QNetworkReply::NoError) {
+            qDebug()<<("网络连接错误: " + reply->errorString());
             reply->deleteLater();
-            return true;
-        } else {
-            LOGGER_DEBUG("网络连接错误: " + reply->errorString());
-            reply->deleteLater();
+            PrintLog("网络连接错误 i:"<<i);
+            PrintLog("网络连接错误 j:"<<j);
             return false;
         }
-    } else {
-        reply->abort();  // 请求超时，终止请求
-        LOGGER_DEBUG("网络请求超时，终止请求");
         reply->deleteLater();
-        return false;
+        j++;
+        PrintLog("成功 i:"<<i);
+        PrintLog("成功 j:"<<j);
+        return true ;
     }
+
+    reply->abort();
+    reply->deleteLater();
+    PrintLog("网络请求超时，终止请求 i:"<<i);
+    PrintLog("网络请求超时，终止请求 j:"<<j);
+    return false;
 }
+
 
 
 void showAutoCloseMessageBox(const QString &title, const QString &text, int msec) {

@@ -160,7 +160,7 @@ bool compareVersionStrings(const QString& version1, const QString& version2);
  * @param msec 超时时间 默认是3000 单位毫秒
  * @return 接口正常则返回true，否则返回false
  */
-bool checkNetworkConnection(const QString &url, uint msec = 30000);
+bool checkNetworkConnection(const QString &url, uint msec = 3000);
 
 
 /**

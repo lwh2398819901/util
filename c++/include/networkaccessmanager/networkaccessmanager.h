@@ -35,6 +35,7 @@
 #include <QHttpMultiPart>
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
+#include <QNetworkCookieJar>
 
 
 class NetworkAccessManager : public QObject
@@ -45,6 +46,7 @@ public:
     void get(const QNetworkRequest &request, int timeout = 30000);
     void post(const QNetworkRequest &request, const QByteArray &data, int timeout = 30000);
     void post(const QNetworkRequest &request, QHttpMultiPart *data, int timeout = 30000);
+    QNetworkAccessManager*getManager(){return &m_anager;}
 signals:
     void sig_timeout(QString url);
     void sig_finish(QNetworkReply *re);
@@ -52,6 +54,7 @@ signals:
 private:
     QTimer m_timer;
     QNetworkAccessManager m_anager;
+    QNetworkCookieJar jar;
     QString m_url;
 };
 

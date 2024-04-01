@@ -31,6 +31,8 @@
 
 NetworkAccessManager::NetworkAccessManager(QObject *parent) : QObject(parent)
 {
+    m_anager.setCookieJar(&jar);
+    m_anager.setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
     connect(&m_anager, &QNetworkAccessManager::finished, [ = ](QNetworkReply * re) {
         m_timer.stop();
         if (re == nullptr) {
@@ -85,6 +87,7 @@ void NetworkAccessManager::post(const QNetworkRequest &request,  QHttpMultiPart 
     m_timer.start(timeout);
     m_url = request.url().url();
     QNetworkReply *pReply = m_anager.post(request, data);
+    data->setParent(pReply);
     connect(&m_timer, &QTimer::timeout, [ = ]() {
         pReply->abort();
         pReply->deleteLater();

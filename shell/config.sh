@@ -93,7 +93,7 @@ function create_user_functions_sh() {
     echo '' >>user_functions.sh
 
     echo 'function check_os_version() {' >>user_functions.sh
-    echo '    echprint_infoo "用户自定义 检查系统版本 这是一个示例 请自行修改"' >>user_functions.sh
+    echo '    print_info "用户自定义 检查系统版本 这是一个示例 请自行修改"' >>user_functions.sh
     echo '    check_ubuntu_version "22.04"' >>user_functions.sh
     echo '    if [[ $? -ne 0 ]]; then' >>user_functions.sh
     echo '        print_error  "当前系统版本不是Ubuntu 22.04 桌面版"' >>user_functions.sh

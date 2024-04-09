@@ -191,6 +191,7 @@ function installSoft() {
         fi
         copy_files "$softDir/$softName.desktop" /home/$userName/.local/share/applications
 
+	# 开机自启动
         if [ ! -d /home/$userName/.config/autostart/ ]; then
             mkdir -p /home/$userName/.config/autostart/
             if [ ! -d /home/$userName/.config/autostart/ ]; then
@@ -200,6 +201,7 @@ function installSoft() {
         fi
         copy_files "$softDir/$softName.desktop" /home/$userName/.config/autostart/
 
+	# 桌面启动图标
         if [ ! -d /home/$userName/桌面 ]; then
             mkdir -p /home/$userName/桌面
             if [ ! -d /home/$userName/桌面 ]; then
@@ -210,6 +212,7 @@ function installSoft() {
         copy_files "$softDir/$softName.desktop" /home/$userName/桌面
     fi
 
+    # 桌面快捷方式
     if [[ $s_lnName == "" ]]; then
         print_info "未指定软连接名，使用desktop内名称"
         s_lnName=$(read_iniFile_field "$softDir/$softName.desktop" "Name")

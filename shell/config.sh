@@ -94,11 +94,11 @@ function create_user_functions_sh() {
 
     echo 'function check_os_version() {' >>user_functions.sh
     echo '    print_info "用户自定义 检查系统版本 这是一个示例 请自行修改"' >>user_functions.sh
-    echo '    check_ubuntu_version "22.04"' >>user_functions.sh
-    echo '    if [[ $? -ne 0 ]]; then' >>user_functions.sh
-    echo '        print_error  "当前系统版本不是Ubuntu 22.04 桌面版"' >>user_functions.sh
-    echo '        return 1' >>user_functions.sh
-    echo '    fi' >>user_functions.sh
+    echo '    # check_ubuntu_version "22.04"' >>user_functions.sh
+    echo '    # if [[ $? -ne 0 ]]; then' >>user_functions.sh
+    echo '    #    print_error  "当前系统版本不是Ubuntu 22.04 桌面版"' >>user_functions.sh
+    echo '    #    return 1' >>user_functions.sh
+    echo '    # fi' >>user_functions.sh
     echo '    return 0' >>user_functions.sh
     echo '}' >>user_functions.sh
     echo '' >>user_functions.sh
@@ -315,6 +315,7 @@ if [ ! -f "./project.ini" ]; then
     if [ ! -f "$s_resourceDir/project_conf/project.ini" ]; then
         print_warning "用户保存的默认配置文件也不存在，将创建默认配置"
         create_project_ini
+        copy_files ./project.ini $s_resourceDir/project_conf/ 
         isExit=1
     else
         print_warning "用户保存的默认配置文件存在，将使用用户保存的默认配置"

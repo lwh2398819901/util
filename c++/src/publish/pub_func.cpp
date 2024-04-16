@@ -1,4 +1,4 @@
-﻿#include "pub_func.h"
+#include "pub_func.h"
 #include "pub_macro.h"
 #include <QFile>
 #include <QTextStream>
@@ -17,6 +17,8 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
+#include <QMessageBox>
+
 
 #if defined(Q_OS_WIN)
 

@@ -13,6 +13,10 @@
 #include <QVector>
 #include <qglobal.h>
 #include <QDateTime>
+#include <QNetworkCookieJar>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 
 #if defined(Q_OS_WIN)
 

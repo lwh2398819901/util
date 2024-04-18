@@ -33,7 +33,7 @@ Logger *Logger::Instance(QString filePath, size_t maxSize, size_t maxCount, spdl
             maxSize = Configure::Instance()->getDefaultMaxFileSize().toInt();
         }
 
-        if (maxSize == 0) {
+        if (maxCount == 0) {
             maxCount = Configure::Instance()->getDefaultMaxFiles().toInt();
         }
 

@@ -29,6 +29,7 @@
 #include <QNetworkReply>
 #include <QMessageBox>
 #include <QNetworkCookieJar>
+#include <QBuffer>
 #elif defined(Q_OS_MAC)
 
 #elif defined(Q_OS_ANDROID)
@@ -349,3 +350,21 @@ void showAutoCloseMessageBox(const QString &title, const QString &text, int msec
 }
 
 
+
+// 将 QPixmap 对象转换为 Base64 编码的字符串
+QString pixmapToBase64(const QPixmap &pixmap)
+{
+    QImage image = pixmap.toImage();
+    QByteArray byteArray;
+    QBuffer buffer(&byteArray);
+    image.save(&buffer, "PNG"); // 将图像保存为PNG格式的字节序列
+    return QString::fromLatin1(byteArray.toBase64());
+}
+
+// 将 Base64 编码的字符串转换为 QPixmap 对象
+QPixmap base64ToPixmap(const QString &base64String)
+{
+    QPixmap pixmap;
+    pixmap.loadFromData(QByteArray::fromBase64(base64String.toLocal8Bit()));
+    return pixmap;
+}

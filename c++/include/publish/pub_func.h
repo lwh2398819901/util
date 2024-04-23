@@ -171,5 +171,7 @@ bool checkNetworkConnection(const QString &url, uint msec = 3000);
  */
 void showAutoCloseMessageBox(const QString& title, const QString& text, int msec = 5000);
 
+QPixmap base64ToPixmap(const QString &arr);
+QString pixmapToBase64(const QPixmap &map);
 
 #endif // PUB_FUNC_H

@@ -18,18 +18,12 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QMessageBox>
-
-
+#include <QBuffer>
 #if defined(Q_OS_WIN)
 
 #elif defined(Q_OS_LINUX)
 #include <unistd.h>
 #include <errno.h>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QMessageBox>
-#include <QNetworkCookieJar>
-#include <QBuffer>
 #elif defined(Q_OS_MAC)
 
 #elif defined(Q_OS_ANDROID)

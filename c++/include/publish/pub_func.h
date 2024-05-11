@@ -65,6 +65,12 @@ bool createFile(const QString &filePath, const QString &content="");
 bool appendFile(const QString &filePath, const QString &content="");
 
 
+
+bool copyFile(const QString &sourcePath, const QString &targetPath);
+
+
+bool copyDirectory(const QString &sourcePath, const QString &targetPath);
+
 /**
  * @brief 获取文件的创建日期
  * @param path 文件路径

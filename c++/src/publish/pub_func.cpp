@@ -19,6 +19,7 @@
 #include <QNetworkRequest>
 #include <QMessageBox>
 #include <QBuffer>
+#include <QDir>
 #if defined(Q_OS_WIN)
 
 #elif defined(Q_OS_LINUX)
@@ -361,4 +362,59 @@ QPixmap base64ToPixmap(const QString &base64String)
     QPixmap pixmap;
     pixmap.loadFromData(QByteArray::fromBase64(base64String.toLocal8Bit()));
     return pixmap;
+}
+
+bool copyFile(const QString &sourcePath, const QString &targetPath) {
+    QFile sourceFile(sourcePath);
+    QFile targetFile(targetPath);
+
+    // 确保源文件存在
+    if (!sourceFile.exists()) {
+        qDebug() << "源文件不存在:" << sourcePath;
+            return false;
+    }
+
+    // 复制文件
+    if (!sourceFile.copy(targetPath)) {
+        qDebug() << "复制文件失败:" << sourcePath << "到" << targetPath;
+            return false;
+    }
+
+    // 如果需要保留源文件的权限，可以使用QFileInfo
+    QFileInfo sourceInfo(sourcePath);
+    QFile::Permissions permissions = sourceInfo.permissions();
+    QFile::setPermissions(targetPath, permissions);
+
+    return true;
+}
+
+bool copyDirectory(const QString &sourcePath, const QString &targetPath) {
+    QDir sourceDir(sourcePath);
+    QDir targetDir(targetPath);
+
+    // 如果目标目录不存在，则创建它
+    if (!targetDir.exists()) {
+        if (!targetDir.mkpath(targetDir.path())) {
+            qDebug() << "无法创建目标目录:" << targetPath;
+            return false;
+        }
+    }
+
+    // 遍历源目录
+    foreach (QFileInfo entry, sourceDir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot)) {
+        QString targetEntryPath = targetDir.filePath(entry.fileName());
+        if (entry.isDir()) {
+            // 如果是目录，则递归复制
+            if (!copyDirectory(entry.filePath(), targetEntryPath)) {
+                return false;
+            }
+        } else {
+            // 如果是文件，则使用QFile::copy进行复制
+            if (!QFile::copy(entry.filePath(), targetEntryPath)) {
+                qDebug() << "复制文件失败:" << entry.filePath() << "到" << targetEntryPath;
+                    return false;
+            }
+        }
+    }
+    return true;
 }

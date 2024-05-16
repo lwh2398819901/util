@@ -31,7 +31,6 @@ void ReconnectTcpclient::disconectTcpServer()
 
 void ReconnectTcpclient::onDisconnected()
 {
-    // 当连接断开时，启动重连定时器
     if (!m_reTime.isActive() && !disConnectFlag)
         m_reTime.start(3000);
 }
@@ -43,21 +42,15 @@ void ReconnectTcpclient::tryConnect()
     QAbstractSocket::SocketState socketState = state();
 
     if (socketState == QAbstractSocket::UnconnectedState) {
-        // 在此状态下可以安全地调用 connectToHost()
-        // 连接到主机
         connectToHost(m_host, m_port);
         m_reTime.start(10000);
         emit sig_tryConnected();
-        LOGGER_DEBUG(u8"tryConnect: 尝试链接 启动定时器..... ");
+        LOGGER_DEBUG(u8"tryConnect: Attempt to link or Try to connect, Start the timer..... ");
     } else if (socketState == QAbstractSocket::HostLookupState) {
-        // 正在查找主机，可以等待或处理其他逻辑
     } else if (socketState == QAbstractSocket::ConnectingState) {
-        // 正在连接中，可以等待或处理其他逻辑
     } else if (socketState == QAbstractSocket::ConnectedState) {
-        // 已连接，可能需要关闭现有连接或执行其他操作
-        LOGGER_DEBUG(u8"tryConnect: 已连接 关闭定时器 ");
+        LOGGER_DEBUG(u8"tryConnect: Connected, Stop the timer ");
         m_reTime.stop();
     } else {
-        // 处理其他状态或错误情况
     }
 }

@@ -1,25 +1,6 @@
 #include "pub_func.h"
 #include "pub_macro.h"
-#include <QFile>
-#include <QTextStream>
-#include <QFileInfo>
-#include <QCryptographicHash>
-#include <QJsonParseError>
-#include <QJsonValue>
-#include <QProcess>
-#include <QTimer>
-#include <QWidget>
-#include <QEventLoop>
-#include <QVector>
-#include <qglobal.h>
-#include <QDateTime>
-#include <QNetworkCookieJar>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QNetworkRequest>
-#include <QMessageBox>
-#include <QBuffer>
-#include <QDir>
+
 #if defined(Q_OS_WIN)
 
 #elif defined(Q_OS_LINUX)
@@ -86,7 +67,7 @@ QString readFileContent(const QString &filePath)
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        PrintErrLog("无法打开文件：" << filePath);
+        PrintErrLog("Unable to open file: " << filePath);
         return QString();
     }
     QTextStream in(&file);
@@ -102,7 +83,7 @@ bool createFile(const QString &filePath, const QString &content) {
         return true;
     }
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        PrintErrLog("无法创建文件：" << filePath);
+        PrintErrLog("Unable to create file: " << filePath);
         return false;
     }
     QTextStream out(&file);
@@ -116,7 +97,7 @@ bool createFile(const QString &filePath, const QString &content) {
 bool appendFile(const QString &filePath, const QString &content) {
     QFile file(filePath);
     if (!file.open(QIODevice::Append | QIODevice::Text)) {
-        PrintErrLog("无法打开文件：" << filePath);
+        PrintErrLog("Unable to open file: " << filePath);
         return false;
     }
     QTextStream out(&file);
@@ -154,7 +135,6 @@ bool createSymbolicLink(const QString &source, const QString &linkPath)
 
 double compareImages(const QImage &image1, const QImage &image2)
 {
-    // 获取图片的像素数据
     const uchar *data1 = image1.constBits();
     const uchar *data2 = image2.constBits();
 
@@ -164,21 +144,19 @@ double compareImages(const QImage &image1, const QImage &image2)
     int totalPixels = width * height;
     int similarPixels = 0;
 
-    // 比较每个像素的灰度值
     for (int i = 0; i < totalPixels; i++) {
         if (data1[i] == data2[i]) {
             similarPixels++;
         }
     }
-    // 计算相似度
+
     double similarity = (double)similarPixels / totalPixels;
     return similarity;
 }
 
 bool scalImageSize(QString filePath)
 {
-    //修改文件长宽比
-    QImage originalImage(filePath);    // 加载原始图片
+    QImage originalImage(filePath);
     if (originalImage.isNull()) {
         return false;
     }
@@ -201,15 +179,12 @@ void runCommandDetached(const QString &command,const QStringList& args)
 
 int runCommandWithTimeout(const QString &command,const QStringList& args, QString &output, int timeout)
 {
-    // 获取当前环境变量
     QProcessEnvironment originalEnv = QProcessEnvironment::systemEnvironment();
 
-    // 创建一个新的环境变量对象
     QProcessEnvironment tempEnv = originalEnv;
     tempEnv.insert("LANG", "en_US.UTF-8");
     tempEnv.insert("LC_ALL", "en_US.UTF-8");
 
-    // 设置新的环境变量
     QProcess process;
     process.setProcessEnvironment(tempEnv);
     process.start(command,args);
@@ -223,7 +198,7 @@ int runCommandWithTimeout(const QString &command,const QStringList& args, QStrin
     }
 
     output = QString::fromLocal8Bit(process.readAllStandardOutput());
-    // 还原原始环境变量
+
     process.setProcessEnvironment(originalEnv);
     return process.exitCode();
 }
@@ -263,7 +238,7 @@ QString calculateMD5(const QString &text) {
     return hashBytes.toHex(); // Convert the hash result to hexadecimal representation
 }
 
-// 自定义函数比较版本号字符串
+
 bool compareVersionStrings(const QString& version1, const QString& version2) {
     QVector<int> parts1;
     for (const auto& part : version1.split(".")) {
@@ -298,15 +273,14 @@ bool checkNetworkConnection(const QString &url, uint msec)
         return false;
     }
 
-    // 创建自定义请求
+
     QNetworkRequest request;
-    // 设置请求的头部
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, true);
     request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
     request.setUrl(url);
 
-    // 发送请求
+
     QNetworkReply* reply = manager.get(request);
     QTimer timer;
     QEventLoop loop;
@@ -315,14 +289,13 @@ bool checkNetworkConnection(const QString &url, uint msec)
     QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
     QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
 
-    timer.start(msec); // 设置超时时间
+    timer.start(msec);
     loop.exec();
 
-    // 处理请求结果
     if (timer.isActive()) {
         timer.stop();
         if (reply->error() != QNetworkReply::NoError) {
-            qDebug()<<("网络连接错误: " + reply->errorString());
+            qDebug()<<("Network connection error:" + reply->errorString());
             reply->deleteLater();
             return false;
         }
@@ -346,17 +319,15 @@ void showAutoCloseMessageBox(const QString &title, const QString &text, int msec
 
 
 
-// 将 QPixmap 对象转换为 Base64 编码的字符串
 QString pixmapToBase64(const QPixmap &pixmap)
 {
     QImage image = pixmap.toImage();
     QByteArray byteArray;
     QBuffer buffer(&byteArray);
-    image.save(&buffer, "PNG"); // 将图像保存为PNG格式的字节序列
+    image.save(&buffer, "PNG");
     return QString::fromLatin1(byteArray.toBase64());
 }
 
-// 将 Base64 编码的字符串转换为 QPixmap 对象
 QPixmap base64ToPixmap(const QString &base64String)
 {
     QPixmap pixmap;
@@ -368,23 +339,21 @@ bool copyFile(const QString &sourcePath, const QString &targetPath) {
     QFile sourceFile(sourcePath);
     QFile targetFile(targetPath);
 
-    // 确保源文件存在
+
     if (!sourceFile.exists()) {
-        qDebug() << "源文件不存在:" << sourcePath;
-            return false;
+        qDebug() << "The source file does not exist:" << sourcePath;
+        return false;
     }
 
-    // 复制文件
+
     if (!sourceFile.copy(targetPath)) {
-        qDebug() << "复制文件失败:" << sourcePath << "到" << targetPath;
-            return false;
+        qDebug() << "Failed to copy the file: " << sourcePath << " to " << targetPath;
+        return false;
     }
 
-    // 如果需要保留源文件的权限，可以使用QFileInfo
     QFileInfo sourceInfo(sourcePath);
     QFile::Permissions permissions = sourceInfo.permissions();
     QFile::setPermissions(targetPath, permissions);
-
     return true;
 }
 
@@ -392,26 +361,23 @@ bool copyDirectory(const QString &sourcePath, const QString &targetPath) {
     QDir sourceDir(sourcePath);
     QDir targetDir(targetPath);
 
-    // 如果目标目录不存在，则创建它
     if (!targetDir.exists()) {
         if (!targetDir.mkpath(targetDir.path())) {
-            qDebug() << "无法创建目标目录:" << targetPath;
+            qDebug() << "Unable to create the target directory:" << targetPath;
             return false;
         }
     }
 
-    // 遍历源目录
+
     foreach (QFileInfo entry, sourceDir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot)) {
         QString targetEntryPath = targetDir.filePath(entry.fileName());
         if (entry.isDir()) {
-            // 如果是目录，则递归复制
             if (!copyDirectory(entry.filePath(), targetEntryPath)) {
                 return false;
             }
         } else {
-            // 如果是文件，则使用QFile::copy进行复制
             if (!QFile::copy(entry.filePath(), targetEntryPath)) {
-                qDebug() << "复制文件失败:" << entry.filePath() << "到" << targetEntryPath;
+                qDebug() << "Failed to copy the file: " << entry.filePath() << " to " << targetEntryPath;
                     return false;
             }
         }

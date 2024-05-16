@@ -10,13 +10,12 @@ Logger::Logger(QString filePath, size_t maxSize, size_t maxCount, spdlog::level:
         filePath = "./logs/log.log";
     }
 
-    // 设置日志文件大小和数量
     logger = spdlog::rotating_logger_mt("logger", filePath.toStdString(),
                                         maxSize, maxCount);
     if (logger == nullptr) {
         exit(-1);
     }
-    // 设置日志格式
+
     spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] %v");
     setLogLevel(log_level);
 }

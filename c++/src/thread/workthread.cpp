@@ -15,7 +15,7 @@ WorkThread::~WorkThread()
 
 void WorkThread::doWork()
 {
-    LOGGER_DEBUG("work run start");
+    LOGGER_DEBUG("WorkThread  Start");
     emit sig_workStart();
     m_status = THREAD_STATUS::START;
     m_work = true;
@@ -25,7 +25,7 @@ void WorkThread::doWork()
     }
     m_status = THREAD_STATUS::STOP;
     emit sig_workStop();
-    LOGGER_DEBUG("work run finish");
+    LOGGER_DEBUG("WorkThread Finish");
 }
 
 

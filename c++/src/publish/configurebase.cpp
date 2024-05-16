@@ -74,14 +74,9 @@ bool ConfigureBase::writeConfig()
     QMap<QString, QString>::iterator innerIterator;
 
     for (outerIterator = m_values.begin(); outerIterator != m_values.end(); ++outerIterator) {
-        // 访问外层map的键
         QString outerKey = outerIterator.key();
-
-        // 遍历内层map
         for (innerIterator = outerIterator.value().begin(); innerIterator != outerIterator.value().end(); ++innerIterator) {
-            // 访问内层map的键和值
             QString innerKey = innerIterator.key();
-            QString innerValue = innerIterator.value();
             setValue(outerKey,innerKey);
         }
     }

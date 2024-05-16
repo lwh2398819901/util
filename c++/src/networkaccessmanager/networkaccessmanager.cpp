@@ -36,16 +36,16 @@ NetworkAccessManager::NetworkAccessManager(QObject *parent) : QObject(parent)
     connect(&m_anager, &QNetworkAccessManager::finished, [ = ](QNetworkReply * re) {
         m_timer.stop();
         if (re == nullptr) {
-            LOGGER_ERR("请求失败:" + m_url);
+            LOGGER_ERR("Request failed: " + m_url);
             emit sig_timeout(m_url);
             return;
         }
 
         if (re->error() != QNetworkReply::NetworkError::NoError) {
-            LOGGER_ERR("网络异常:" + m_url);
+            LOGGER_ERR("Network exception: " + m_url);
             emit sig_networkError(re);
         } else {
-            LOGGER_INFO("请求成功:" + m_url);
+            LOGGER_INFO("Request successful: " + m_url);
             emit sig_finish(re);
         }
     });
@@ -62,7 +62,7 @@ void NetworkAccessManager::get(const QNetworkRequest &request, int timeout)
         pReply->deleteLater();
         m_timer.stop();
         emit sig_timeout(m_url);
-        LOGGER_ERR("请求超时:" + m_url);
+        LOGGER_ERR("Request timed out: " + m_url);
     });
 }
 
@@ -77,7 +77,7 @@ void NetworkAccessManager::post(const QNetworkRequest &request, const QByteArray
         pReply->deleteLater();
         m_timer.stop();
         emit sig_timeout(m_url);
-        LOGGER_ERR("请求超时:" + m_url);
+        LOGGER_ERR("Request timed out: " + m_url);
     });
 }
 
@@ -93,6 +93,6 @@ void NetworkAccessManager::post(const QNetworkRequest &request,  QHttpMultiPart 
         pReply->deleteLater();
         m_timer.stop();
         emit sig_timeout(m_url);
-        LOGGER_ERR("请求超时:" + m_url);
+        LOGGER_ERR("Request timed out: " + m_url);
     });
 }

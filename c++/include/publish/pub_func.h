@@ -23,11 +23,18 @@
 
 #include <QNetworkAccessManager>
 #include <QNetworkCookieJar>
+#include <QNetworkInterface>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 
 #include <QEventLoop>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+#include <QStringDecoder>
+#include <QStringEncoder>
 
+#else
+#include <QTextCodec>
+# endif
 /**
  * Converts a byte array to a JSON object.
  * @param reply_data The input byte array.
@@ -186,6 +193,17 @@ bool checkNetworkConnection(const QString &url, uint msec = 3000);
  */
 void showAutoCloseMessageBox(const QString& title, const QString& text, int msec = 5000);
 
+
+// 显示错误消息框的封装函数
+void showErrorMsgBox(const QString &message);
+
+// 显示提示消息框的封装函数
+void showInfoMsgBox(const QString &message);
+
+// 询问对话框
+bool askQuestionMsgBox(const QString &message);
+
+
 /**
  * Converts a base64 encoded string to a QPixmap image.
  * @param arr The base64 encoded string to convert.
@@ -200,4 +218,19 @@ QPixmap base64ToPixmap(const QString &arr);
  */
 QString pixmapToBase64(const QPixmap &map);
 
+
+
+
+// UTF-8 转 GBK
+QByteArray utf8ToGbk(const QString &utf8String);
+
+// GBK 转 UTF-8
+QString gbkToUtf8(const QByteArray &gbkByteArray);
+
+bool isLocalIP(const QString &ip);
+
+
 #endif // PUB_FUNC_H
+
+
+

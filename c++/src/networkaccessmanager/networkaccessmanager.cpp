@@ -68,6 +68,7 @@ void NetworkAccessManager::get(const QNetworkRequest &request, int timeout)
 
 void NetworkAccessManager::post(const QNetworkRequest &request, const QByteArray &data, int timeout)
 {
+    m_arr = data;
     m_timer.setSingleShot(true);
     m_timer.start(timeout);
     m_url = request.url().url();

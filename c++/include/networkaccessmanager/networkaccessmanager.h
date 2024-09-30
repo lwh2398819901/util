@@ -47,6 +47,7 @@ public:
     void post(const QNetworkRequest &request, const QByteArray &data, int timeout = 30000);
     void post(const QNetworkRequest &request, QHttpMultiPart *data, int timeout = 30000);
     QNetworkAccessManager*getManager(){return &m_anager;}
+    QByteArray getPostData(){return m_arr;}
 signals:
     void sig_timeout(QString url);
     void sig_finish(QNetworkReply *re);
@@ -56,6 +57,7 @@ private:
     QNetworkAccessManager m_anager;
     QNetworkCookieJar jar;
     QString m_url;
+    QByteArray m_arr;
 };
 
 #endif // NETWORKACCESSMANAGER_H

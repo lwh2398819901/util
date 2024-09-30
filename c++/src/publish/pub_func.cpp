@@ -65,8 +65,7 @@ bool hasKey(const QJsonObject &obj, QString key, int &value)
 QString readFileContent(const QString &filePath)
 {
     QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         PrintErrLog("Unable to open file: " << filePath);
         return QString();
     }
@@ -77,7 +76,8 @@ QString readFileContent(const QString &filePath)
 }
 
 
-bool createFile(const QString &filePath, const QString &content) {
+bool createFile(const QString &filePath, const QString &content)
+{
     QFile file(filePath);
     if (file.exists()) {
         return true;
@@ -94,7 +94,8 @@ bool createFile(const QString &filePath, const QString &content) {
 }
 
 
-bool appendFile(const QString &filePath, const QString &content) {
+bool appendFile(const QString &filePath, const QString &content)
+{
     QFile file(filePath);
     if (!file.open(QIODevice::Append | QIODevice::Text)) {
         PrintErrLog("Unable to open file: " << filePath);
@@ -124,7 +125,7 @@ bool createSymbolicLink(const QString &source, const QString &linkPath)
     int result = symlink(src, lnk);
     if (result == -1) {
         perror("Error creating symbolic link:");
-        LOGGER_ERR( QString("Error creating symbolic link: ")+ strerror(errno));
+        LOGGER_ERR(QString("Error creating symbolic link: ") + strerror(errno));
         return false;
     }
     return true;
@@ -172,12 +173,12 @@ bool scalImageSize(QString filePath)
 }
 
 
-void runCommandDetached(const QString &command,const QStringList& args)
+void runCommandDetached(const QString &command, const QStringList& args)
 {
-    QProcess::startDetached(command,args);
+    QProcess::startDetached(command, args);
 }
 
-int runCommandWithTimeout(const QString &command,const QStringList& args, QString &output, int timeout)
+int runCommandWithTimeout(const QString &command, const QStringList& args, QString &output, int timeout)
 {
     QProcessEnvironment originalEnv = QProcessEnvironment::systemEnvironment();
 
@@ -187,7 +188,7 @@ int runCommandWithTimeout(const QString &command,const QStringList& args, QStrin
 
     QProcess process;
     process.setProcessEnvironment(tempEnv);
-    process.start(command,args);
+    process.start(command, args);
     if (!process.waitForStarted(timeout)) {
         return -1;
     }
@@ -200,13 +201,14 @@ int runCommandWithTimeout(const QString &command,const QStringList& args, QStrin
     output = QString::fromLocal8Bit(process.readAllStandardOutput());
 
     process.setProcessEnvironment(originalEnv);
+    qDebug() << process.errorString();
     return process.exitCode();
 }
 
 
 void enableWidgetWithDelay(QWidget *widget, int msec)
 {
-    if(!widget){
+    if (!widget) {
         return ;
     }
 
@@ -219,7 +221,7 @@ void enableWidgetWithDelay(QWidget *widget, int msec)
 void eventPause(int msec)
 {
     QEventLoop eventLoop;
-    QTimer::singleShot(msec,&eventLoop,&QEventLoop::quit);
+    QTimer::singleShot(msec, &eventLoop, &QEventLoop::quit);
     eventLoop.exec();
 }
 
@@ -233,13 +235,15 @@ QString generateUuid(QStringList list)
     return calculateMD5(uniqueString);
 }
 
-QString calculateMD5(const QString &text) {
+QString calculateMD5(const QString &text)
+{
     QByteArray hashBytes = QCryptographicHash::hash(text.toUtf8(), QCryptographicHash::Md5);
     return hashBytes.toHex(); // Convert the hash result to hexadecimal representation
 }
 
 
-bool compareVersionStrings(const QString& version1, const QString& version2) {
+bool compareVersionStrings(const QString& version1, const QString& version2)
+{
     QVector<int> parts1;
     for (const auto& part : version1.split(".")) {
         parts1.push_back(part.toInt());
@@ -269,7 +273,7 @@ bool checkNetworkConnection(const QString &url, uint msec)
     manager.setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
 
     QUrl urlObj(url);
-    if(!urlObj.isValid()){
+    if (!urlObj.isValid()) {
         return false;
     }
 
@@ -295,7 +299,7 @@ bool checkNetworkConnection(const QString &url, uint msec)
     if (timer.isActive()) {
         timer.stop();
         if (reply->error() != QNetworkReply::NoError) {
-            qDebug()<<("Network connection error:" + reply->errorString());
+            qDebug() << ("Network connection error:" + reply->errorString());
             reply->deleteLater();
             return false;
         }
@@ -310,7 +314,8 @@ bool checkNetworkConnection(const QString &url, uint msec)
 
 
 
-void showAutoCloseMessageBox(const QString &title, const QString &text, int msec) {
+void showAutoCloseMessageBox(const QString &title, const QString &text, int msec)
+{
     QMessageBox* msgBox = new QMessageBox(QMessageBox::Information, title, text, QMessageBox::NoButton, 0, Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
     msgBox->show();
     eventPause(msec);
@@ -335,7 +340,8 @@ QPixmap base64ToPixmap(const QString &base64String)
     return pixmap;
 }
 
-bool copyFile(const QString &sourcePath, const QString &targetPath) {
+bool copyFile(const QString &sourcePath, const QString &targetPath)
+{
     QFile sourceFile(sourcePath);
     QFile targetFile(targetPath);
 
@@ -357,7 +363,8 @@ bool copyFile(const QString &sourcePath, const QString &targetPath) {
     return true;
 }
 
-bool copyDirectory(const QString &sourcePath, const QString &targetPath) {
+bool copyDirectory(const QString &sourcePath, const QString &targetPath)
+{
     QDir sourceDir(sourcePath);
     QDir targetDir(targetPath);
 
@@ -378,9 +385,88 @@ bool copyDirectory(const QString &sourcePath, const QString &targetPath) {
         } else {
             if (!QFile::copy(entry.filePath(), targetEntryPath)) {
                 qDebug() << "Failed to copy the file: " << entry.filePath() << " to " << targetEntryPath;
-                    return false;
+                return false;
             }
         }
     }
     return true;
+}
+
+void showErrorMsgBox(const QString &message)
+{
+    QMessageBox msgBox;
+    msgBox.setIcon(QMessageBox::Critical);
+    msgBox.setWindowTitle("错误");
+    msgBox.setText(message);
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setButtonText(QMessageBox::Ok, "确定");
+    msgBox.exec();
+}
+
+void showInfoMsgBox(const QString &message)
+{
+    QMessageBox msgBox;
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setWindowTitle("提示");
+    msgBox.setText(message); // 设置消息文本
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setButtonText(QMessageBox::Ok, "确定");
+    msgBox.exec();
+}
+
+bool askQuestionMsgBox(const QString &message)
+{
+    QMessageBox msgBox;
+    msgBox.setIcon(QMessageBox::Question);
+    msgBox.setWindowTitle("询问");
+    msgBox.setText(message);
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setButtonText(QMessageBox::Yes, "是");
+    msgBox.setButtonText(QMessageBox::No, "否");
+    return msgBox.exec() == QMessageBox::Yes;
+}
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+QByteArray utf8ToGbk(const QString &utf8String)
+{
+    QByteArray gbkByteArray;
+    QStringEncoder encoder("GBK"); // 使用 GBK 编码
+    gbkByteArray = encoder.encode(utf8String);
+    return gbkByteArray;
+}
+
+QString gbkToUtf8(const QByteArray &gbkByteArray)
+{
+    QString utf8String;
+    QStringDecoder decoder("GBK"); // 使用 GBK 编码
+    utf8String = decoder.decode(gbkByteArray);
+    return utf8String;
+}
+
+#else
+QByteArray utf8ToGbk(const QString &utf8String)
+{
+    QTextCodec *codec = QTextCodec::codecForName("GBK");
+    return codec->fromUnicode(utf8String);
+}
+
+QString gbkToUtf8(const QByteArray &gbkByteArray)
+{
+    QTextCodec *codec = QTextCodec::codecForName("gb2312");
+    return codec->toUnicode(gbkByteArray);
+}
+# endif
+
+
+
+bool isLocalIP(const QString &ip)
+{
+    foreach (const QNetworkInterface &interface, QNetworkInterface::allInterfaces()) {
+        for (const QNetworkAddressEntry &entry : interface.addressEntries()) {
+            if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol && entry.ip().toString() == ip) {
+                return true;
+            }
+        }
+    }
+    return false;
 }

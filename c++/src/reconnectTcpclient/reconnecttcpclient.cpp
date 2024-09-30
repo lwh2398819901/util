@@ -5,6 +5,9 @@ ReconnectTcpclient::ReconnectTcpclient(QObject *parent)
     : QTcpSocket{parent}
 {
     connect(this, &QTcpSocket::disconnected, this, &ReconnectTcpclient::onDisconnected);
+    connect(this, &QTcpSocket::connected, [=](){
+         LOGGER_DEBUG(QString("链接设备： port=%1").arg(localPort()));
+    });
     connect(&m_reTime, &QTimer::timeout, this, &ReconnectTcpclient::tryConnect);
 }
 

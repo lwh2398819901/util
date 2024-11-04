@@ -62,6 +62,17 @@ bool hasKey(const QJsonObject &obj, QString key, int &value)
     return true;
 }
 
+bool hasKey(const QJsonObject &obj, QString key, double &value)
+{   
+    if (!obj.contains(key)) {
+        return false;
+    }
+    QJsonValue v = obj.value(key);
+    value = v.toDouble();
+    return true;
+}
+
+
 QString readFileContent(const QString &filePath)
 {
     QFile file(filePath);
@@ -470,3 +481,4 @@ bool isLocalIP(const QString &ip)
     }
     return false;
 }
+

@@ -53,6 +53,7 @@ bool byteArray2JsonOBj(const QByteArray &reply_data, QJsonObject &obj);
 bool hasKey(const QJsonObject &obj, QString key, QString &value);
 bool hasKey(const QJsonObject &obj, QString key, bool &value);
 bool hasKey(const QJsonObject &obj, QString key, int &value);
+bool hasKey(const QJsonObject &obj, QString key, double &value);
 
 /**
  * Reads the content of a file specified by the file path.

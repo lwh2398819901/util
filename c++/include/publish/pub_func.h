@@ -26,9 +26,13 @@
 #include <QNetworkInterface>
 #include <QNetworkReply>
 #include <QNetworkRequest>
+#include <QTableWidget>
 
 #include <QEventLoop>
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+#include <QCheckBox>
+#include <QGridLayout>
+#include <QGroupBox>
 #include <QStringDecoder>
 #include <QStringEncoder>
 
@@ -230,6 +234,11 @@ QString gbkToUtf8(const QByteArray &gbkByteArray);
 
 bool isLocalIP(const QString &ip);
 
+QGroupBox *createCheckBoxGroupForTable(QTableWidget *table,
+                                       const QSet<int> &uncontrolableColumns,
+                                       QString groupTitle);
+
+void searchTableItem(QTableWidget *tableWidget, const QString &findStr);
 
 #endif // PUB_FUNC_H
 

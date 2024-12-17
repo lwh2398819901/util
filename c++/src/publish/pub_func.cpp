@@ -482,3 +482,60 @@ bool isLocalIP(const QString &ip)
     return false;
 }
 
+QGroupBox *createCheckBoxGroupForTable(QTableWidget *table,
+                                       const QSet<int> &uncontrolableColumns,
+                                       QString groupTitle) {
+  // 创建一个组框来包含所有的复选框
+  QGroupBox *checkBoxGroup = new QGroupBox();
+  QGridLayout *layout = new QGridLayout(checkBoxGroup);
+
+  int row = 0;
+  // 为QTableWidget的每一列创建一个复选框
+  for (int column = 0; column < table->columnCount(); ++column) {
+    if (uncontrolableColumns.contains(column)) {
+      // 如果当前列在不可控制的列集合中，跳过创建复选框
+      continue;
+    }
+
+    QCheckBox *checkBox =
+        new QCheckBox(table->horizontalHeaderItem(column)->text());
+
+    // 连接信号和槽，以便复选框的状态改变时，可以隐藏或显示列
+    QObject::connect(checkBox, &QCheckBox::stateChanged,
+                     [table, column](int state) {
+                       table->setColumnHidden(column, state != Qt::Checked);
+                     });
+
+    // 默认状态，不隐藏任何列
+    checkBox->setChecked(true);
+
+    // 在网格布局中添加复选框
+    layout->addWidget(checkBox, row / 2, row % 2, 1, 1);
+    row++;
+  }
+
+  // 设置布局
+  checkBoxGroup->setLayout(layout);
+  checkBoxGroup->setTitle(groupTitle);
+  return checkBoxGroup;
+}
+
+void searchTableItem(QTableWidget *tableWidget, const QString &findStr)
+{
+    // 遍历QTableWidget中的所有单元格
+    for (int row = 0; row < tableWidget->rowCount(); ++row) {
+        for (int column = 0; column < tableWidget->columnCount(); ++column) {
+            QTableWidgetItem *item = tableWidget->item(row, column);
+            if (item) {
+                // 获取单元格文本
+                QString text = item->text();
+                // 检查是否包含搜索字符串
+                if (text.contains(findStr, Qt::CaseInsensitive)) {
+                    // 高亮显示匹配的单元格
+                    tableWidget->setCurrentItem(item);
+                }
+            }
+        }
+    }
+}
+

@@ -1,5 +1,5 @@
 ﻿/**
- * @copyright 2023-2023 Uniontech Technology Co., Ltd.
+ * @copyright 2024-2025 liuwh
  *
  * @file
  *
@@ -32,7 +32,7 @@
 
 //该文件为模板文件，每一个用户都需要自己实现该文件，如果不需要，可以保持空文件
 
-class Configure:public ConfigureBase
+class Configure: public ConfigureBase
 {
     explicit Configure(const QString &filePath);
     Configure(const Configure &) = delete;
@@ -40,9 +40,13 @@ class Configure:public ConfigureBase
 public:
     ~Configure();
     static Configure *Instance(const QString &filePath = "./config.ini");
-    
+
+    getSetString(ProjectName, projectName, "Project", "name");
+
     bool readConfig();
     bool writeConfig();
+
+    QMap<QString, QMap<QString, QString>> getMap() {return this->m_values;}
 };
 
 

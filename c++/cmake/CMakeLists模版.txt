@@ -1,0 +1,88 @@
+# 指定CMake的最低版本要求
+cmake_minimum_required(VERSION 3.10)
+
+# 设置项目的默认名称和版本
+set(DEFAULT_PROJECT_NAME "defaultProjectName")
+set(DEFAULT_PROJECT_VERSION 1.0.0)
+set(DEFAULT_PROJECT_BRANCH_NAME "master")
+
+
+# 检查当前目录是否为Git仓库
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../.git")
+  set(IS_GIT_PROJECT false)
+else()
+  set(IS_GIT_PROJECT true)
+endif()
+
+
+# 如果是Git项目，则尝试获取最新的标签版本号
+if (IS_GIT_PROJECT)
+    message("CMake is a Git project")
+
+    # 获取Git项目分支名称 并打印
+    execute_process(
+        COMMAND git rev-parse --abbrev-ref HEAD
+        OUTPUT_VARIABLE GIT_BRANCH_NAME
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE GIT_COMMAND_RESULT
+    )
+    if(GIT_COMMAND_RESULT)
+        message("Failed to get Git branch name; using Default Branch Name master")
+        set(GIT_BRANCH_NAME ${DEFAULT_PROJECT_BRANCH_NAME})
+    endif()
+
+    # 获取Git项目版本号
+    execute_process(
+        COMMAND git describe --tags --abbrev=0
+        TIMEOUT 5
+        OUTPUT_VARIABLE GIT_PROJECT_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE GIT_COMMAND_RESULT
+    )
+    if(GIT_COMMAND_RESULT)
+        message("Failed to get project version from Git; using Default Version 1.0.0")
+        set(GIT_PROJECT_VERSION ${DEFAULT_PROJECT_VERSION})
+    endif()
+else()
+    # 如果不是Git项目，则使用默认版本号
+    message("The current project is not a Git project, using default version tag ${DEFAULT_PROJECT_VERSION} and branch name ${DEFAULT_PROJECT_BRANCH_NAME}")
+    set(GIT_PROJECT_VERSION ${DEFAULT_PROJECT_VERSION})
+    set(GIT_BRANCH_NAME ${DEFAULT_PROJECT_BRANCH_NAME})
+endif()
+
+# 创建项目，设置项目名称和版本，指定支持的语言
+project(${DEFAULT_PROJECT_NAME} VERSION ${GIT_PROJECT_VERSION} LANGUAGES CXX)
+set(PRODUCT_NAME ${PROJECT_NAME})
+
+# 使用configure_file命令生成version.h文件，将version.h.in模板文件复制并替换其中的变量
+configure_file(
+    ${CMAKE_SOURCE_DIR}/util/c++/cmake/version.h.in
+    ${CMAKE_SOURCE_DIR}/util/c++/include/publish/version.h
+    @ONLY
+)
+
+# 打印出项目名称，分支 版本号
+message("Project Name: ${PROJECT_NAME}")
+message("Branch Name: ${GIT_BRANCH_NAME}")
+message("Version: ${GIT_PROJECT_VERSION}")
+
+
+# 添加第三方库spdlog的子目录，并包含其头文件
+add_subdirectory(util/c++/3rdpart/spdlog)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/util/c++/3rdpart/spdlog/include)
+
+# 添加选项，启用第三方库
+option(USER_QXLSX "Enable QXlsx" ON)
+option(USER_Qt-Advanced-Docking-System "Enable Qt-Advanced-Docking-System" OFF)
+
+if (USER_Qt-Advanced-Docking-System)
+    add_subdirectory(util/c++/3rdpart/Qt-Advanced-Docking-System)
+endif()
+
+if (USER_QXLSX)
+    add_subdirectory(util/c++/3rdpart/QXlsx-master/QXlsx)
+endif()
+
+# 添加其他子项目到构建过程中
+add_subdirectory(src)
+

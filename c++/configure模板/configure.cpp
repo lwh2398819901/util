@@ -1,5 +1,5 @@
 /**
- * @copyright 2023-2023 Uniontech Technology Co., Ltd.
+ * @copyright 2024-2025 liuwh
  *
  * @file
  *
@@ -27,10 +27,9 @@
 
 
 #include "configure.h"
-#include <QSysInfo>
 
 
-Configure::Configure(const QString &filePath):ConfigureBase(filePath)
+Configure::Configure(const QString &filePath): ConfigureBase(filePath)
 {
     readConfig();
     writeConfig();
@@ -39,7 +38,6 @@ Configure::Configure(const QString &filePath):ConfigureBase(filePath)
 Configure::~Configure()
 {
     writeConfig();
-    delete m_ini;
 }
 
 Configure *Configure::Instance(const QString &filePath)
@@ -51,21 +49,16 @@ Configure *Configure::Instance(const QString &filePath)
     return instance;
 }
 
-
 bool Configure::readConfig()
 {
     ConfigureBase::readConfig();
-
-
-
+    getValue("Project", "name", "defaultProjectName");
     return true;
 }
 
 bool Configure::writeConfig()
 {
     ConfigureBase::writeConfig();
-
-
     m_ini->sync();
     return true;
 }

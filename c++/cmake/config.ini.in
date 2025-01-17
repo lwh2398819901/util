@@ -1,0 +1,4 @@
+[config]
+debug=@CMAKE_BUILD_TYPE@
+softName=@PRODUCT_NAME@
+version=@GIT_PROJECT_VERSION@

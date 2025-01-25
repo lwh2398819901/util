@@ -158,7 +158,7 @@ void enableWidgetWithDelay(QWidget *widget, int msec = 1000);
  * Pauses the execution of the program for a specified duration.
  * @param msec The duration of the pause in milliseconds.
  */
-void eventPause(int msec);
+void eventPause(int msec,bool *isExit = nullptr);
 
 /**
  * Generates a unique identifier (UUID) based on a list of strings.
@@ -196,7 +196,7 @@ bool checkNetworkConnection(const QString &url, uint msec = 3000);
  * @param text The content of the message to be displayed.
  * @param msec The duration in milliseconds the message box will be displayed before closing (default is 5000).
  */
-void showAutoCloseMessageBox(const QString& title, const QString& text, int msec = 5000);
+void showAutoCloseMessageBox(const QString& title, const QString& text, int msec = 5000,bool *isExit = nullptr);
 
 
 // 显示错误消息框的封装函数

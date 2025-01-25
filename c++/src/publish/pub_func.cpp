@@ -229,9 +229,19 @@ void enableWidgetWithDelay(QWidget *widget, int msec)
     });
 }
 
-void eventPause(int msec)
+void eventPause(int msec,bool *isExit)
 {
     QEventLoop eventLoop;
+    QTimer timer;
+    if(isExit!= nullptr){
+        timer.start(1000);
+        QObject::connect(&timer, &QTimer::timeout,[&](){
+                if(*isExit){
+                    eventLoop.quit();
+                }
+            }
+        );
+    }
     QTimer::singleShot(msec, &eventLoop, &QEventLoop::quit);
     eventLoop.exec();
 }
@@ -325,11 +335,11 @@ bool checkNetworkConnection(const QString &url, uint msec)
 
 
 
-void showAutoCloseMessageBox(const QString &title, const QString &text, int msec)
+void showAutoCloseMessageBox(const QString &title, const QString &text, int msec, bool *isExit)
 {
     QMessageBox* msgBox = new QMessageBox(QMessageBox::Information, title, text, QMessageBox::NoButton, 0, Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
     msgBox->show();
-    eventPause(msec);
+    eventPause(msec,isExit);
     delete msgBox;
 }
 

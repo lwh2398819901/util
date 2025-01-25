@@ -15,7 +15,7 @@
 #define LOGGER_ERR(msg) Logger::Instance()->log(__FILE__,__func__,msg,spdlog::level::err);
 #define LOGGER_CRITICAL(msg) Logger::Instance()->log(__FILE__,__func__,msg,spdlog::level::critical);
 
-#define LOGGER_TRACE_P(msg) Logger::Instance()->log(__FILE__,__func__,msg,spdlog::level::trace);PrintLog(msg)ss
+#define LOGGER_TRACE_P(msg) Logger::Instance()->log(__FILE__,__func__,msg,spdlog::level::trace);PrintLog(msg)
 #define LOGGER_DEBUG_P(msg) Logger::Instance()->log(__FILE__,__func__,msg,spdlog::level::debug);PrintLog(msg)
 #define LOGGER_INFO_P(msg) Logger::Instance()->log(__FILE__,__func__,msg,spdlog::level::info);PrintLog(msg)
 #define LOGGER_WARN_P(msg) Logger::Instance()->log(__FILE__,__func__,msg,spdlog::level::warn);PrintLog(msg)

@@ -1,6 +1,10 @@
 #include "pub_func.h"
 #include "pub_macro.h"
 
+#include <QApplication>
+#include <QFileDialog>
+#include <QClipboard>
+
 #if defined(Q_OS_WIN)
 
 #elif defined(Q_OS_LINUX)
@@ -416,12 +420,23 @@ bool copyDirectory(const QString &sourcePath, const QString &targetPath)
 void showErrorMsgBox(const QString &message)
 {
     QMessageBox msgBox;
-    msgBox.setIcon(QMessageBox::Critical);
+    msgBox.setIcon(QMessageBox::Warning);
     msgBox.setWindowTitle("错误");
     msgBox.setText(message);
-    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Save | QMessageBox::Apply);
     msgBox.setButtonText(QMessageBox::Ok, "确定");
-    msgBox.exec();
+    msgBox.setButtonText(QMessageBox::Save, "保存");
+    msgBox.setButtonText(QMessageBox::Apply, "复制");
+    int ret = msgBox.exec();
+    if (ret == QMessageBox::Save) {
+        QString filePath = QFileDialog::getSaveFileName(nullptr, "保存错误信息", "", "Text Files (*.txt)");
+        if (!filePath.isEmpty()) {
+            createFile(filePath,message);
+        }
+    } else if (ret == QMessageBox::Apply) {
+        // 放入剪切板
+        QApplication::clipboard()->setText(message);
+    }
 }
 
 void showInfoMsgBox(const QString &message)
@@ -430,9 +445,18 @@ void showInfoMsgBox(const QString &message)
     msgBox.setIcon(QMessageBox::Information);
     msgBox.setWindowTitle("提示");
     msgBox.setText(message); // 设置消息文本
-    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Save | QMessageBox::Apply);
     msgBox.setButtonText(QMessageBox::Ok, "确定");
-    msgBox.exec();
+    msgBox.setButtonText(QMessageBox::Save, "保存");
+    int ret = msgBox.exec();
+    if (ret == QMessageBox::Save) {
+        QString filePath = QFileDialog::getSaveFileName(nullptr, "保存提示信息", "", "Text Files (*.txt)");
+        if (!filePath.isEmpty()) {
+            createFile(filePath,message);
+        }
+    }else if (ret == QMessageBox::Apply) {  
+        QApplication::clipboard()->setText(message);
+    }
 }
 
 bool askQuestionMsgBox(const QString &message)

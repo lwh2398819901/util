@@ -417,16 +417,21 @@ bool copyDirectory(const QString &sourcePath, const QString &targetPath)
     return true;
 }
 
-void showErrorMsgBox(const QString &message)
+void showErrorMsgBox(const QString &message,bool isCopy)
 {
     QMessageBox msgBox;
     msgBox.setIcon(QMessageBox::Warning);
     msgBox.setWindowTitle("错误");
     msgBox.setText(message);
-    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Save | QMessageBox::Apply);
+    if(isCopy){
+        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Save | QMessageBox::Apply);
+    }else {
+        msgBox.setStandardButtons(QMessageBox::Ok);
+    }
+
     msgBox.setButtonText(QMessageBox::Ok, "确定");
-    msgBox.setButtonText(QMessageBox::Save, "保存");
-    msgBox.setButtonText(QMessageBox::Apply, "复制");
+    msgBox.setButtonText(QMessageBox::Save, "保存文本");
+    msgBox.setButtonText(QMessageBox::Apply, "复制文本");
     int ret = msgBox.exec();
     if (ret == QMessageBox::Save) {
         QString filePath = QFileDialog::getSaveFileName(nullptr, "保存错误信息", "", "Text Files (*.txt)");
@@ -439,15 +444,20 @@ void showErrorMsgBox(const QString &message)
     }
 }
 
-void showInfoMsgBox(const QString &message)
+void showInfoMsgBox(const QString &message, bool isCopy)
 {
     QMessageBox msgBox;
     msgBox.setIcon(QMessageBox::Information);
     msgBox.setWindowTitle("提示");
     msgBox.setText(message); // 设置消息文本
-    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Save | QMessageBox::Apply);
+    if(isCopy){
+        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Save | QMessageBox::Apply);
+    }else {
+        msgBox.setStandardButtons(QMessageBox::Ok);
+    }
     msgBox.setButtonText(QMessageBox::Ok, "确定");
-    msgBox.setButtonText(QMessageBox::Save, "保存");
+    msgBox.setButtonText(QMessageBox::Save, "保存文本");
+    msgBox.setButtonText(QMessageBox::Apply, "复制文本");
     int ret = msgBox.exec();
     if (ret == QMessageBox::Save) {
         QString filePath = QFileDialog::getSaveFileName(nullptr, "保存提示信息", "", "Text Files (*.txt)");

@@ -200,10 +200,10 @@ void showAutoCloseMessageBox(const QString& title, const QString& text, int msec
 
 
 // 显示错误消息框的封装函数
-void showErrorMsgBox(const QString &message);
+void showErrorMsgBox(const QString &message,bool isCopy = false);
 
 // 显示提示消息框的封装函数
-void showInfoMsgBox(const QString &message);
+void showInfoMsgBox(const QString &message,bool isCopy = false);
 
 // 询问对话框
 bool askQuestionMsgBox(const QString &message);

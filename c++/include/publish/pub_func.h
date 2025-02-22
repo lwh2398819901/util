@@ -1,6 +1,7 @@
 ﻿#ifndef PUB_FUNC_H
 #define PUB_FUNC_H
 
+#include "version.h"
 #include <QByteArray>
 #include <QDateTime>
 #include <QFile>
@@ -13,232 +14,360 @@
 #include <QTextStream>
 #include <QTimer>
 #include <QVector>
-#include <qglobal.h>
-
-#include <QWidget>
-#include <QMessageBox>
-#include <QImage>
-#include <QPixmap>
+#include <QtGlobal>
 #include <QBuffer>
-
 #include <QNetworkAccessManager>
 #include <QNetworkCookieJar>
 #include <QNetworkInterface>
 #include <QNetworkReply>
 #include <QNetworkRequest>
-#include <QTableWidget>
-
 #include <QEventLoop>
+
+
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-#include <QCheckBox>
-#include <QGridLayout>
-#include <QGroupBox>
 #include <QStringDecoder>
 #include <QStringEncoder>
-
 #else
 #include <QTextCodec>
 # endif
+
+
+#if ENABLE_QT_WIDGETS
+#include <QWidget>
+#include <QTableWidget>
+#include <QMessageBox>
+#include <QImage>
+#include <QPixmap>
+
+#include <QCheckBox>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QApplication>
+#include <QFileDialog>
+#include <QClipboard>
+
+#endif
+
+
+// ====================== 非GUI函数 ======================
+
+// ------------- 字符串处理和编码转换 -------------
 /**
- * Converts a byte array to a JSON object.
- * @param reply_data The input byte array.
- * @param obj The reference to the output JSON object.
- * @return Returns true if the conversion is successful, false otherwise.
+ * UTF-8 转 GBK 编码转换
+ * @param utf8String UTF-8编码的字符串
+ * @return GBK编码的字节数组
+ * @example 
+ *   QString utf8Str = "测试文本";
+ *   QByteArray gbkData = utf8ToGbk(utf8Str);
+ */
+QByteArray utf8ToGbk(const QString &utf8String);
+
+/**
+ * GBK 转 UTF-8 编码转换
+ * @param gbkByteArray GBK编码的字节数组
+ * @return UTF-8编码的字符串
+ * @example
+ *   QByteArray gbkData = ...;
+ *   QString utf8Str = gbkToUtf8(gbkData);
+ */
+QString gbkToUtf8(const QByteArray &gbkByteArray);
+
+/**
+ * 计算字符串的MD5哈希值
+ * @param text 需要计算哈希值的字符串
+ * @return MD5哈希值字符串
+ * @example
+ *   QString text = "需要加密的文本";
+ *   QString md5 = calculateMD5(text);
+ */
+QString calculateMD5(const QString &text);
+
+/**
+ * 比较两个版本号字符串
+ * @param version1 第一个版本号
+ * @param version2 第二个版本号
+ * @return 如果version1大于version2返回true
+ * @example
+ *   bool isNewer = compareVersionStrings("2.0.1", "1.9.9"); // 返回true
+ */
+bool compareVersionStrings(const QString& version1, const QString& version2);
+
+/**
+ * 根据字符串列表生成UUID
+ * @param list 用于生成UUID的字符串列表
+ * @return 生成的UUID字符串
+ * @example
+ *   QStringList list = {"数据1", "数据2"};
+ *   QString uuid = generateUuid(list);
+ */
+QString generateUuid(QStringList list);
+
+// ------------- JSON处理 -------------
+/**
+ * 将字节数组转换为JSON对象
+ * @param reply_data 包含JSON数据的字节数组
+ * @param obj 输出的JSON对象
+ * @return 转换成功返回true
+ * @example
+ *   QByteArray data = "{\"name\":\"测试\"}";
+ *   QJsonObject obj;
+ *   if(byteArray2JsonOBj(data, obj)) {
+ *       qDebug() << obj["name"].toString();
+ *   }
  */
 bool byteArray2JsonOBj(const QByteArray &reply_data, QJsonObject &obj);
 
 /**
- * Checks if a JSON object contains a given key and retrieves its value if present.
- * @param obj The JSON object to search within.
- * @param key The key to look for in the JSON object.
- * @param value The reference to the variable where the value will be stored if the key is found.
- * @return Returns true if the key is found, false otherwise.
+ * 检查JSON对象中是否存在指定键并获取其值
+ * @param obj JSON对象
+ * @param key 要查找的键
+ * @param value 输出值
+ * @return 找到键则返回true
+ * @example
+ *   QJsonObject obj;
+ *   QString value;
+ *   if(hasKey(obj, "name", value)) {
+ *       qDebug() << "找到值:" << value;
+ *   }
  */
 bool hasKey(const QJsonObject &obj, QString key, QString &value);
 bool hasKey(const QJsonObject &obj, QString key, bool &value);
 bool hasKey(const QJsonObject &obj, QString key, int &value);
 bool hasKey(const QJsonObject &obj, QString key, double &value);
 
+// ------------- 文件操作 -------------
 /**
- * Reads the content of a file specified by the file path.
- * @param filePath The path of the file to read from.
- * @return Returns a string containing the file's content.
- * @note This function does not handle large files efficiently and is not recommended for such use cases.
+ * 读取文件内容
+ * @param filePath 文件路径
+ * @return 文件内容字符串
+ * @example
+ *   QString content = readFileContent("/path/to/file.txt");
  */
 QString readFileContent(const QString &filePath);
 
 /**
- * Creates a new file with the specified file path.
- * @param filePath The path where the file is to be created.
- * @param content Optional content to write into the file upon creation.
- * @return Returns true if the file is created successfully, false otherwise.
+ * 创建新文件
+ * @param filePath 文件路径
+ * @param content 文件初始内容
+ * @return 创建成功返回true
+ * @example
+ *   bool success = createFile("/path/to/file.txt", "初始内容");
  */
 bool createFile(const QString &filePath, const QString &content = "");
 
 /**
- * Appends content to a file, or creates the file if it does not exist.
- * @param filePath The path of the file to append content to.
- * @param content The content to append to the file.
- * @return Returns true if the content is appended successfully, false otherwise.
+ * 追加内容到文件
+ * @param filePath 文件路径
+ * @param content 要追加的内容
+ * @return 追加成功返回true
+ * @example
+ *   bool success = appendFile("/path/to/file.txt", "追加的内容");
  */
 bool appendFile(const QString &filePath, const QString &content = "");
 
 /**
- * Copies a file from the source path to the target path.
- * @param sourcePath The path of the source file.
- * @param targetPath The path where the file is to be copied to.
- * @return Returns true if the file is copied successfully, false otherwise.
+ * 复制文件
+ * @param sourcePath 源文件路径
+ * @param targetPath 目标文件路径
+ * @return 复制成功返回true
+ * @example
+ *   bool success = copyFile("/source/file.txt", "/dest/file.txt");
  */
 bool copyFile(const QString &sourcePath, const QString &targetPath);
 
 /**
- * Copies a directory from the source path to the target path.
- * @param sourcePath The path of the source directory.
- * @param targetPath The path where the directory is to be copied to.
- * @return Returns true if the directory is copied successfully, false otherwise.
+ * 复制目录
+ * @param sourcePath 源目录路径
+ * @param targetPath 目标目录路径
+ * @return 复制成功返回true
+ * @example
+ *   bool success = copyDirectory("/source/dir", "/dest/dir");
  */
 bool copyDirectory(const QString &sourcePath, const QString &targetPath);
 
 /**
- * Retrieves the creation date of a file.
- * @param path The path of the file.
- * @return Returns the creation date and time of the file.
+ * 获取文件创建时间
+ * @param path 文件路径
+ * @return 文件创建时间
+ * @example
+ *   QDateTime createTime = getCreationDate("/path/to/file.txt");
  */
 QDateTime getCreationDate(const QString &path);
 
 /**
- * Creates a symbolic link that points to the source path.
- * @param source The path to the target of the symbolic link.
- * @param linkPath The path where the symbolic link is to be created.
- * @return Returns true if the symbolic link is created successfully, false otherwise.
- * @example createSymbolicLink("/home/test/123", "/tmp/123") creates a soft link for the file /home/test/123 to /tmp/123.
+ * 创建符号链接
+ * @param source 源文件路径
+ * @param linkPath 链接文件路径
+ * @return 创建成功返回true
+ * @example
+ *   bool success = createSymbolicLink("/real/path", "/link/path");
  */
 bool createSymbolicLink(const QString &source, const QString &linkPath);
 
+// ------------- 进程和系统 -------------
 /**
- * Compares two images and returns the degree of their similarity.
- * @param image1 The first image to compare.
- * @param image2 The second image to compare.
- * @return Returns a double representing the similarity between the two images.
- */
-double compareImages(const QImage &image1, const QImage &image2);
-
-/**
- * Adjusts the size of an image based on the file path provided.
- * @param filePath The file path of the image to resize.
- * @return Returns true if the image size is adjusted successfully, false otherwise.
- */
-bool scalImageSize(QString filePath);
-
-/**
- * Executes a command in a subprocess with a specified timeout period.
- * @param command The command to be executed.
- * @param args The arguments for the command.
- * @param output The reference to a string where the subprocess output will be stored.
- * @param timeout The timeout period for the subprocess in milliseconds (default is 30000).
- * @return Returns the exit code of the subprocess.
+ * 执行命令并等待结果（带超时）
+ * @param command 要执行的命令
+ * @param args 命令参数列表
+ * @param output 命令输出结果
+ * @param timeout 超时时间（毫秒）
+ * @return 命令执行的返回码
+ * @example
+ *   QString output;
+ *   int exitCode = runCommandWithTimeout("ls", {"-l"}, output, 5000);
  */
 int runCommandWithTimeout(const QString &command, const QStringList &args, QString &output, int timeout = 30000);
 
 /**
- * Executes a command in a subprocess and detaches it from the calling process.
- * @param command The command to be executed.
- * @param args The arguments for the command.
+ * 执行命令（不等待结果）
+ * @param command 要执行的命令
+ * @param args 命令参数列表
+ * @example
+ *   runCommandDetached("notepad", {"file.txt"});
  */
 void runCommandDetached(const QString &command, const QStringList& args);
 
 /**
- * Enables a widget after a specified delay.
- * @param widget The widget to be enabled.
- * @param msec The delay in milliseconds before enabling the widget (default is 1000).
+ * 暂停事件循环指定时间
+ * @param msec 暂停时间（毫秒）
+ * @example
+ *   eventPause(1000); // 暂停1秒
  */
-void enableWidgetWithDelay(QWidget *widget, int msec = 1000);
+void eventPause(int msec);
 
+// ------------- 网络相关 -------------
 /**
- * Pauses the execution of the program for a specified duration.
- * @param msec The duration of the pause in milliseconds.
- */
-void eventPause(int msec,bool *isExit = nullptr);
-
-/**
- * Generates a unique identifier (UUID) based on a list of strings.
- * @param list The list of strings to base the UUID generation on.
- * @return Returns a string representing the generated UUID.
- */
-QString generateUuid(QStringList list);
-
-/**
- * Calculates the MD5 hash of a given string.
- * @param text The string for which to calculate the MD5 hash.
- * @return Returns a string representing the MD5 hash.
- */
-QString calculateMD5(const QString &text);
-
-/**
- * Compares two version number strings to determine which one is greater.
- * @param version1 The first version number string to compare.
- * @param version2 The second version number string to compare.
- * @return Returns true if version1 is greater than version2, false otherwise.
- */
-bool compareVersionStrings(const QString& version1, const QString& version2);
-
-/**
- * Checks if a network connection to a specified URL is operational within a given timeout.
- * @param url The URL to check for network connectivity.
- * @param msec The timeout in milliseconds for the network operation (default is 3000).
- * @return Returns true if the network connection is operational, false otherwise.
+ * 检查网络连接状态
+ * @param url 要检查的URL
+ * @param msec 超时时间（毫秒）
+ * @return 连接正常返回true
+ * @example
+ *   bool isConnected = checkNetworkConnection("https://www.example.com");
  */
 bool checkNetworkConnection(const QString &url, uint msec = 3000);
 
 /**
- * Displays a message box with a message and title, which automatically closes after a set duration.
- * @param title The title of the message box.
- * @param text The content of the message to be displayed.
- * @param msec The duration in milliseconds the message box will be displayed before closing (default is 5000).
+ * 检查是否为本地IP地址
+ * @param ip IP地址字符串
+ * @return 是本地IP返回true
+ * @example
+ *   bool isLocal = isLocalIP("127.0.0.1"); // 返回true
  */
-void showAutoCloseMessageBox(const QString& title, const QString& text, int msec = 5000,bool *isExit = nullptr);
+bool isLocalIP(const QString &ip);
 
+// ====================== GUI函数 ======================
+#if ENABLE_QT_WIDGETS
 
-// 显示错误消息框的封装函数
-void showErrorMsgBox(const QString &message,bool isCopy = false);
-
-// 显示提示消息框的封装函数
-void showInfoMsgBox(const QString &message,bool isCopy = false);
-
-// 询问对话框
-bool askQuestionMsgBox(const QString &message);
-
+// ------------- 窗口部件操作 -------------
+/**
+ * 延迟启用窗口部件
+ * @param widget 要启用的窗口部件
+ * @param msec 延迟时间（毫秒）
+ * @example
+ *   enableWidgetWithDelay(myButton, 2000);
+ */
+void enableWidgetWithDelay(QWidget *widget, int msec = 1000);
 
 /**
- * Converts a base64 encoded string to a QPixmap image.
- * @param arr The base64 encoded string to convert.
- * @return Returns a QPixmap representing the image.
+ * 为表格创建复选框组
+ * @param table 目标表格
+ * @param uncontrolableColumns 不可控制的列集合
+ * @param groupTitle 组标题
+ * @return 创建的复选框组
+ * @example
+ *   QSet<int> uncontrolCols = {1, 2};
+ *   QGroupBox *group = createCheckBoxGroupForTable(table, uncontrolCols, "选项");
+ */
+QGroupBox *createCheckBoxGroupForTable(QTableWidget *table,
+                                     const QSet<int> &uncontrolableColumns,
+                                     QString groupTitle);
+
+/**
+ * 搜索表格内容
+ * @param tableWidget 目标表格
+ * @param findStr 搜索文本
+ * @example
+ *   searchTableItem(tableWidget, "搜索内容");
+ */
+void searchTableItem(QTableWidget *tableWidget, const QString &findStr);
+
+// ------------- 图像处理 -------------
+/**
+ * 比较两个图像的相似度
+ * @param image1 第一个图像
+ * @param image2 第二个图像
+ * @return 相似度值（0-1之间）
+ * @example
+ *   double similarity = compareImages(image1, image2);
+ */
+double compareImages(const QImage &image1, const QImage &image2);
+
+/**
+ * 调整图像大小
+ * @param filePath 图像文件路径
+ * @return 调整成功返回true
+ * @example
+ *   bool success = scalImageSize("/path/to/image.jpg");
+ */
+bool scalImageSize(QString filePath);
+
+/**
+ * Base64字符串转图像
+ * @param arr Base64编码的字符串
+ * @return 转换后的图像
+ * @example
+ *   QPixmap pixmap = base64ToPixmap(base64String);
  */
 QPixmap base64ToPixmap(const QString &arr);
 
 /**
- * Converts a QPixmap image to a base64 encoded string.
- * @param map The QPixmap image to convert.
- * @return Returns a string containing the base64 encoded representation of the image.
+ * 图像转Base64字符串
+ * @param map 要转换的图像
+ * @return Base64编码的字符串
+ * @example
+ *   QString base64 = pixmapToBase64(pixmap);
  */
 QString pixmapToBase64(const QPixmap &map);
 
+// ------------- 消息框 -------------
+/**
+ * 显示自动关闭的消息框
+ * @param title 消息框标题
+ * @param text 消息内容
+ * @param msec 显示时间（毫秒）
+ * @example
+ *   showAutoCloseMessageBox("提示", "操作完成", 3000);
+ */
+void showAutoCloseMessageBox(const QString& title, const QString& text, int msec = 5000);
 
+/**
+ * 显示错误消息框
+ * @param message 错误信息
+ * @example
+ *   showErrorMsgBox("操作失败");
+ */
+void showErrorMsgBox(const QString &message,bool isCopy = false);
 
+/**
+ * 显示提示消息框
+ * @param message 提示信息
+ * @example
+ *   showInfoMsgBox("操作成功");
+ */
+void showInfoMsgBox(const QString &message,bool isCopy = false);
 
-// UTF-8 转 GBK
-QByteArray utf8ToGbk(const QString &utf8String);
+/**
+ * 显示询问消息框
+ * @param message 询问信息
+ * @return 用户选择"是"返回true
+ * @example
+ *   if(askQuestionMsgBox("是否继续？")) {
+ *       // 用户选择了"是"
+ *   }
+ */
+bool askQuestionMsgBox(const QString &message);
 
-// GBK 转 UTF-8
-QString gbkToUtf8(const QByteArray &gbkByteArray);
-
-bool isLocalIP(const QString &ip);
-
-QGroupBox *createCheckBoxGroupForTable(QTableWidget *table,
-                                       const QSet<int> &uncontrolableColumns,
-                                       QString groupTitle);
-
-void searchTableItem(QTableWidget *tableWidget, const QString &findStr);
+#endif // ENABLE_QT_WIDGETS
 
 #endif // PUB_FUNC_H
 

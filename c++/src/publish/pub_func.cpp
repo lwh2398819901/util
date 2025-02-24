@@ -1,6 +1,6 @@
 #include "pub_func.h"
 #include "pub_macro.h"
-#include <qapplication.h>
+
 
 
 

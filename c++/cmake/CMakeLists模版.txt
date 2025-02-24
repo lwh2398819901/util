@@ -2,24 +2,45 @@
 cmake_minimum_required(VERSION 3.10)
 
 # 设置项目的默认名称和版本
-set(DEFAULT_PROJECT_NAME "defaultProjectName")
+set(DEFAULT_PROJECT_NAME "示例项目名称")
 set(DEFAULT_PROJECT_VERSION 1.0.0)
 set(DEFAULT_PROJECT_BRANCH_NAME "master")
 
+message(STATUS "============================================")
+message(STATUS "Start configuring project: ${DEFAULT_PROJECT_NAME}")
+message(STATUS "============================================")
 
 # 检查当前目录是否为Git仓库
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../.git")
-  set(IS_GIT_PROJECT false)
+    set(IS_GIT_PROJECT false)
+    message(STATUS "Git Status  : Not a Git project")
 else()
-  set(IS_GIT_PROJECT true)
+    set(IS_GIT_PROJECT true)
+    message(STATUS "Git Status  : Git project")
 endif()
 
 
-# 如果是Git项目，则尝试获取最新的标签版本号
-if (IS_GIT_PROJECT)
-    message("CMake is a Git project")
+# 添加选项，启用第三方库
+option(USE_QXLSX "启用 QXlsx 库" On)
+option(USE_Qt-Advanced-Docking-System "启用 Qt-Advanced-Docking-System 库" On)
+option(USE_QT_WIDGETS "启用 QT Widgets 模块" On)
 
-    # 获取Git项目分支名称 并打印
+message(STATUS "---------------- Third-party Libraries ----------------")
+message(STATUS "QXlsx       : ${USE_QXLSX}")
+message(STATUS "Adv Docking : ${USE_Qt-Advanced-Docking-System}")
+message(STATUS "Qt Widgets  : ${USE_QT_WIDGETS}")
+
+if(USE_QT_WIDGETS)
+    set(ENABLE_QT_WIDGETS 1)
+else()
+    set(ENABLE_QT_WIDGETS 0)
+endif()
+
+
+# 如果是Git项目，则获取版本信息
+if (IS_GIT_PROJECT)
+    message(STATUS "---------------- Git Information ----------------")
+    # 获取Git项目分支名称
     execute_process(
         COMMAND git rev-parse --abbrev-ref HEAD
         OUTPUT_VARIABLE GIT_BRANCH_NAME
@@ -27,8 +48,10 @@ if (IS_GIT_PROJECT)
         RESULT_VARIABLE GIT_COMMAND_RESULT
     )
     if(GIT_COMMAND_RESULT)
-        message("Failed to get Git branch name; using Default Branch Name master")
+        message(STATUS "Branch      : Failed, using default ${DEFAULT_PROJECT_BRANCH_NAME}")
         set(GIT_BRANCH_NAME ${DEFAULT_PROJECT_BRANCH_NAME})
+    else()
+        message(STATUS "Branch      : ${GIT_BRANCH_NAME}")
     endif()
 
     # 获取Git项目版本号
@@ -40,49 +63,111 @@ if (IS_GIT_PROJECT)
         RESULT_VARIABLE GIT_COMMAND_RESULT
     )
     if(GIT_COMMAND_RESULT)
-        message("Failed to get project version from Git; using Default Version 1.0.0")
+        message(STATUS "Version     : Failed, using default ${DEFAULT_PROJECT_VERSION}")
         set(GIT_PROJECT_VERSION ${DEFAULT_PROJECT_VERSION})
+    else()
+        message(STATUS "Version     : ${GIT_PROJECT_VERSION}")
     endif()
 else()
-    # 如果不是Git项目，则使用默认版本号
-    message("The current project is not a Git project, using default version tag ${DEFAULT_PROJECT_VERSION} and branch name ${DEFAULT_PROJECT_BRANCH_NAME}")
+    # 非Git项目使用默认配置
+    message(STATUS "Using default configuration:")
+    message(STATUS "Branch      : ${DEFAULT_PROJECT_BRANCH_NAME}")
+    message(STATUS "Version     : ${DEFAULT_PROJECT_VERSION}")
     set(GIT_PROJECT_VERSION ${DEFAULT_PROJECT_VERSION})
     set(GIT_BRANCH_NAME ${DEFAULT_PROJECT_BRANCH_NAME})
 endif()
 
-# 创建项目，设置项目名称和版本，指定支持的语言
+
+
+# 创建项目
 project(${DEFAULT_PROJECT_NAME} VERSION ${GIT_PROJECT_VERSION} LANGUAGES CXX)
 set(PRODUCT_NAME ${PROJECT_NAME})
 
-# 使用configure_file命令生成version.h文件，将version.h.in模板文件复制并替换其中的变量
+message(STATUS "---------------- Project Configuration ----------------")
+message(STATUS "Project     : ${PROJECT_NAME}")
+message(STATUS "Version     : ${PROJECT_VERSION}")
+message(STATUS "Product     : ${PRODUCT_NAME}")
+
+# 生成版本信息头文件
 configure_file(
     ${CMAKE_SOURCE_DIR}/util/c++/cmake/version.h.in
     ${CMAKE_SOURCE_DIR}/util/c++/include/publish/version.h
     @ONLY
 )
 
-# 打印出项目名称，分支 版本号
-message("Project Name: ${PROJECT_NAME}")
-message("Branch Name: ${GIT_BRANCH_NAME}")
-message("Version: ${GIT_PROJECT_VERSION}")
+# 自动创建一个config.ini文件
+configure_file(
+    ${CMAKE_SOURCE_DIR}/util/c++/cmake/config.ini.in
+    ${CMAKE_BINARY_DIR}/bin/config.ini
+    @ONLY
+)
+message(STATUS "Version Header: Generated")
 
 
-# 添加第三方库spdlog的子目录，并包含其头文件
+message(STATUS "---------------- Dependencies ----------------")
+# 添加spdlog库
 add_subdirectory(util/c++/3rdpart/spdlog)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/util/c++/3rdpart/spdlog/include)
+message(STATUS "spdlog      : Added")
 
-# 添加选项，启用第三方库
-option(USER_QXLSX "Enable QXlsx" ON)
-option(USER_Qt-Advanced-Docking-System "Enable Qt-Advanced-Docking-System" OFF)
-
-if (USER_Qt-Advanced-Docking-System)
+# 根据选项添加其他第三方库
+if (USE_Qt-Advanced-Docking-System)
     add_subdirectory(util/c++/3rdpart/Qt-Advanced-Docking-System)
+    message(STATUS "Docking Sys : Added")
 endif()
 
-if (USER_QXLSX)
+if (USE_QXLSX)
     add_subdirectory(util/c++/3rdpart/QXlsx-master/QXlsx)
+    message(STATUS "QXlsx       : Added")
 endif()
 
-# 添加其他子项目到构建过程中
-add_subdirectory(src)
 
+# 添加源代码目录
+add_subdirectory(src)
+add_subdirectory(update)
+
+message(STATUS "Source Dir  : Added")
+
+message(STATUS "============================================")
+message(STATUS "Project configuration completed")
+message(STATUS "============================================")
+
+# Only execute deployment process in Release build  以下为windows平台打包客户端使用 可屏蔽
+if (NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+    message(STATUS "Not a Release build, skipping deployment process")
+    return()
+endif()
+
+# Get Qt deployment tool paths
+get_target_property(qmake_exec_filepath Qt${QT_VERSION_MAJOR}::qmake IMPORTED_LOCATION)
+get_filename_component(qt_exec_bin_dir "${qmake_exec_filepath}" DIRECTORY)
+find_program(windeployqt_exec_filepath windeployqt HINTS "${qt_exec_bin_dir}")
+
+message(STATUS "Qt Deployment Tool Info:")
+message(STATUS "  qmake path: ${qmake_exec_filepath}")
+message(STATUS "  Qt bin directory: ${qt_exec_bin_dir}")
+message(STATUS "  windeployqt path: ${windeployqt_exec_filepath}")
+
+# Deploy Qt dependencies
+message(STATUS "Deploying Qt dependencies...")
+execute_process(COMMAND "${windeployqt_exec_filepath}" 
+    ${CMAKE_BINARY_DIR}/bin/${DEFAULT_PROJECT_NAME}/${DEFAULT_PROJECT_NAME}.exe)
+execute_process(COMMAND "${windeployqt_exec_filepath}"
+    ${CMAKE_BINARY_DIR}/bin/${DEFAULT_PROJECT_NAME}-update/${DEFAULT_PROJECT_NAME}-update.exe)
+
+# Package with Enigma Virtual Box
+message(STATUS "Packaging with Enigma Virtual Box...")
+set(ENIGMA_PATH "C:/Program Files (x86)/Enigma Virtual Box/enigmavbconsole.exe")
+execute_process(COMMAND "${ENIGMA_PATH}"
+    ${CMAKE_CURRENT_SOURCE_DIR}/resource/${DEFAULT_PROJECT_NAME}.evb)
+execute_process(COMMAND "${ENIGMA_PATH}"
+    ${CMAKE_CURRENT_SOURCE_DIR}/resource/${DEFAULT_PROJECT_NAME}-update.evb)
+
+# Upload files to server
+message(STATUS "Uploading files to server...")
+set(UPLOAD_URL "http://192.168.110.168:6990/update")
+execute_process(COMMAND curl -T ${CMAKE_BINARY_DIR}/bin/config.ini ${UPLOAD_URL}/config.ini)
+execute_process(COMMAND curl -T ${CMAKE_BINARY_DIR}/bin/${DEFAULT_PROJECT_NAME}.exe 
+    ${UPLOAD_URL}/${DEFAULT_PROJECT_NAME}.exe)
+execute_process(COMMAND curl -T ${CMAKE_BINARY_DIR}/bin/${DEFAULT_PROJECT_NAME}-update.exe
+    ${UPLOAD_URL}/${DEFAULT_PROJECT_NAME}-update.exe)

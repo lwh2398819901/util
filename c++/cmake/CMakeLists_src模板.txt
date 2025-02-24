@@ -1,9 +1,9 @@
-﻿# 设置cmake最小版本  为了支持spdlog
+# 设置cmake最小版本  为了支持spdlog
 cmake_minimum_required(VERSION 3.16)
 # 设置项目名
 project(${PRODUCT_NAME})
 # 设置输出位置 这里设置为二进制目录下bin
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin/${PROJECT_NAME})
 # 启用Qt的自动UI代码生成、元对象编译和资源文件编译功能
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -15,15 +15,69 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 # 根据找到的Qt版本查找所需的组件
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
-    Widgets)
+    Widgets
+    Network
+    Multimedia
+    MultimediaWidgets
+    WebEngineWidgets
+    WebEngineCore)
 
 
 
 # 定义项目源文件列表
 set(${PROJECT_NAME}_SOURCES
     main.cpp
+    authdialog.h
+    authdialog.cpp
+    authdialog.ui
+    tcpclient.cpp
+    tcpclient.h
+    spinbox.cpp
+    spinbox.h
+    fileserver.cpp
+    fileserver.h
+
+    tablewidget.cpp
+    tablewidget.h
+    tablewidget.ui
+
+    dateselectdialog.cpp
+    dateselectdialog.h
+    dateselectdialog.ui
+
+    mainwindow.cpp
+    mainwindow.h
+    mainwindow.ui
+
+    customheaderview.h
+    customheaderview.cpp
+
+    logWidget/logmainwindow.cpp
+    logWidget/logmainwindow.h
+    logWidget/logmainwindow.ui
+
+    riskWidget/riskcontrolmainwindow.cpp
+    riskWidget/riskcontrolmainwindow.h
+    riskWidget/riskcontrolmainwindow.ui
+
+    riskWidget/videowidget.cpp
+    riskWidget/videowidget.h
+    riskWidget/videowidget.ui
+
+    riskWidget/riskwidget.h
+    riskWidget/riskwidget.cpp
+    riskWidget/riskwidget.ui
+
+
+    ../../../oceanEnum/oceanengineenum.cpp
+    ../../../oceanEnum/oceanengineenum.h
+
+
+    excel/excelmanager.h
+    excel/excelmanager.cpp
 
     ../resource/res.qrc
+    ../resource/icon.rc
     ../configure/configure.h
     ../configure/configure.cpp
 
@@ -33,32 +87,34 @@ set(${PROJECT_NAME}_SOURCES
     ../util/c++/include/publish/pub_func.h
     ../util/c++/include/publish/publish.h
     ../util/c++/include/reconnectTcpclient/reconnecttcpclient.h
+    ../util/c++/include/thread/workthread.h
+    ../util/c++/include/networkaccessmanager/networkaccessmanager.h
     ../util/c++/include/qtsingleapplication/qtlockedfile.h
     ../util/c++/include/qtsingleapplication/qtlocalpeer.h
     ../util/c++/include/qtsingleapplication/qtsinglecoreapplication.h
-    ../util/c++/include/qtsingleapplication/qtsingleapplication.h
-    ../util/c++/include/thread/workthread.h
-    ../util/c++/include/networkaccessmanager/networkaccessmanager.h
 
     ../util/c++/src/publish/logger.cpp
     ../util/c++/src/publish/configurebase.cpp
     ../util/c++/src/publish/pub_func.cpp
     ../util/c++/src/reconnectTcpclient/reconnecttcpclient.cpp
-    ../util/c++/src/qtsingleapplication/qtlocalpeer.cpp
-    ../util/c++/src/qtsingleapplication/qtsingleapplication.cpp
-    ../util/c++/src/qtsingleapplication/qtsinglecoreapplication.cpp
     ../util/c++/src/thread/workthread.cpp
     ../util/c++/src/networkaccessmanager/networkaccessmanager.cpp
-
+    ../util/c++/src/qtsingleapplication/qtlocalpeer.cpp
+    ../util/c++/src/qtsingleapplication/qtsinglecoreapplication.cpp
 )
 
+if (USE_QT_WIDGETS)
+    set(${PROJECT_NAME}_SOURCES  ${${PROJECT_NAME}_SOURCES}
+        ../util/c++/src/qtsingleapplication/qtsingleapplication.cpp
+        ../util/c++/include/qtsingleapplication/qtsingleapplication.h
+    )
+endif()
 
 # 添加资源命令（根据你的Qt版本选择qt5_add_resources或qt6_add_resources）
-if (QT_VERSION_MAJOR EQUAL 5)
-    qt5_add_resources(${PROJECT_NAME}_SOURCES ../resource/res.qrc)
-else()
-    qt6_add_resources(${PROJECT_NAME}_SOURCES ../resource/res.qrc)
-endif()
+#qt5_add_resources(${PROJECT_NAME}_SOURCES ../resource/res.qrc)
+
+# 或者如果你使用的是Qt6
+qt6_add_resources(${PROJECT_NAME}_SOURCES ../resource/res.qrc)
 
 # 判断操作系统
 if (WIN32)
@@ -71,21 +127,34 @@ endif()
 # 链接Qt相关的库到可执行文件
 target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Network
+    Qt${QT_VERSION_MAJOR}::Multimedia
+    Qt${QT_VERSION_MAJOR}::MultimediaWidgets
+    Qt${QT_VERSION_MAJOR}::WebEngineWidgets
+    Qt${QT_VERSION_MAJOR}::WebEngineCore
     )
 
 
-if (USER_Qt-Advanced-Docking-System)
+if (USE_Qt-Advanced-Docking-System)
     target_include_directories(${PROJECT_NAME} PRIVATE "../util/c++/3rdpart/Qt-Advanced-Docking-System/src/")
     target_link_libraries(${PROJECT_NAME} PRIVATE qt${QT_VERSION_MAJOR}advanceddocking)
 endif()
 
-if (USER_QXLSX)
+if (USE_QXLSX)
     target_link_libraries(${PROJECT_NAME} PRIVATE QXlsx::QXlsx)
+endif()
+
+if (USE_QT_WIDGETS)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 endif()
 
 
 # 为目标添加包含目录
 target_include_directories(${PROJECT_NAME} PRIVATE ./)
+target_include_directories(${PROJECT_NAME} PRIVATE ./riskWidget)
+target_include_directories(${PROJECT_NAME} PRIVATE ./logWidget)
+target_include_directories(${PROJECT_NAME} PRIVATE ./excel)
+target_include_directories(${PROJECT_NAME} PRIVATE ../../../oceanEnum)
 target_include_directories(${PROJECT_NAME} PRIVATE ../configure)
 target_include_directories(${PROJECT_NAME} PRIVATE ../util/c++/configure)
 target_include_directories(${PROJECT_NAME} PRIVATE ../util/c++/include/publish)
@@ -93,8 +162,3 @@ target_include_directories(${PROJECT_NAME} PRIVATE ../util/c++/include/reconnect
 target_include_directories(${PROJECT_NAME} PRIVATE ../util/c++/include/qtsingleapplication)
 target_include_directories(${PROJECT_NAME} PRIVATE ../util/c++/include/thread)
 target_include_directories(${PROJECT_NAME} PRIVATE ../util/c++/include/networkaccessmanager)
-
-
-
-
-

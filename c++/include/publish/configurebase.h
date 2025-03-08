@@ -76,32 +76,20 @@ public:
     void setValue(QString field, QString key, QString value);
     void setValue(QString field, QString key);
 
-// All configuration property code should be written below.
-// The following are common properties for each project.
+    getSetString(SoftName, name, "config", "softName")                              // 软件名称
+    getSetString(Version, version, "config", "version")                             // 软件版本
+    getSetString(Debug, debug, "config", "debug")                                   // 软件功能控制：debug/release/release_test
+    getSetString(SingletonProcess, singletonProcess, "config", "singletonProcess")  // 进程是否为单例
+    getSetString(UseNetworkProxy, useNetworkProxy, "config", "useNetworkProxy")     // 是否使用网络代理
 
-    // Software name
-    getSetString(SoftName, name, "config", "softName")
-    // Software version
-    getSetString(Version, version, "config", "version")
-    // Software feature control: debug/release/release_test
-    getSetString(Debug, debug, "config", "debug")
-    // Whether the process is a singleton
-    getSetString(SingletonProcess, singletonProcess, "config", "singletonProcess")
-    // Whether to use a network proxy
-    getSetString(UseNetworkProxy, useNetworkProxy, "config", "useNetworkProxy")
-
-    // Log file size
-    getSetString(DefaultMaxFileSize, maxFileSize, "Log", "defaultMaxFileSize")
-    // Number of log files
-    getSetString(DefaultMaxFiles, maxFiles, "Log", "defaultMaxFiles")
-    // Log level
-    getSetString(DefaultLevel, level, "Log", "defaultLevel")
-    // Log file path
-    getSetString(DefaultFilePath, filePath, "Log", "defaultFilePath")
+    getSetString(DefaultMaxFileSize, maxFileSize, "Log", "defaultMaxFileSize")      // 日志文件大小
+    getSetString(DefaultMaxFiles, maxFiles, "Log", "defaultMaxFiles")               // 日志文件数量
+    getSetString(DefaultLevel, level, "Log", "defaultLevel")                        // 日志级别
+    getSetString(DefaultFilePath, filePath, "Log", "defaultFilePath")               // 日志文件路径
 
 protected:
-    QMap<QString, QMap<QString, QString>> m_values;
-    QSettings *m_ini{};
+    QMap<QString, QMap<QString, QString>> m_values;                         
+    QSettings *m_ini{};                                                        
 };
 
 

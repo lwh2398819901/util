@@ -1,11 +1,11 @@
 /**
  * @copyright 2023-2023 Uniontech Technology Co., Ltd.
  *
- * @file
+ * @file networkaccessmanager.h
  *
- * @brief
+ * @brief 网络访问管理器类的声明
  *
- * @date
+ * @date 2023-01-08
  *
  * Author: liuwh  <2398819901@qq.com>
  *
@@ -25,7 +25,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #ifndef NETWORKACCESSMANAGER_H
 #define NETWORKACCESSMANAGER_H
 
@@ -37,27 +36,41 @@
 #include <QNetworkAccessManager>
 #include <QNetworkCookieJar>
 
-
+// 网络访问管理器类
 class NetworkAccessManager : public QObject
 {
     Q_OBJECT
+
 public:
+    // 构造函数
     explicit NetworkAccessManager(QObject *parent = nullptr);
+
+    // 发送 GET 请求
     void get(const QNetworkRequest &request, int timeout = 30000);
+
+    // 发送 POST 请求（字节数组）
     void post(const QNetworkRequest &request, const QByteArray &data, int timeout = 30000);
+
+    // 发送 POST 请求（多部分数据）
     void post(const QNetworkRequest &request, QHttpMultiPart *data, int timeout = 30000);
-    QNetworkAccessManager*getManager(){return &m_anager;}
-    QByteArray getPostData(){return m_arr;}
+
+    // 获取网络访问管理器实例
+    QNetworkAccessManager* getManager() { return &m_anager; }
+
+    // 获取 POST 数据
+    QByteArray getPostData() { return m_arr; }
+
 signals:
-    void sig_timeout(QString url);
-    void sig_finish(QNetworkReply *re);
-    void sig_networkError(QNetworkReply *re);
+    void sig_timeout(QString url);            // 超时信号
+    void sig_finish(QNetworkReply *re);       // 完成信号
+    void sig_networkError(QNetworkReply *re); // 网络错误信号
+
 private:
-    QTimer m_timer;
-    QNetworkAccessManager m_anager;
-    QNetworkCookieJar jar;
-    QString m_url;
-    QByteArray m_arr;
+    QTimer m_timer;                           // 定时器
+    QNetworkAccessManager m_anager;           // 网络访问管理器
+    QNetworkCookieJar jar;                    // Cookie Jar
+    QString m_url;                            // URL
+    QByteArray m_arr;                         // POST 数据
 };
 
 #endif // NETWORKACCESSMANAGER_H
